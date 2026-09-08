@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[A13] 病房照護紀錄作業</title>
+<style>
+  /* ====== 基本版面：模仿原系統的綠色底、左側病人清單、右側多頁輸入 ====== */
+  :root{
+    --green-bg:#dff0d8;
+    --green-bg2:#eaf6e6;
+    --pink:#f6a6b2;
+    --pink-dark:#e8899a;
+    --blue:#4a90d9;
+    --border:#bcd6b8;
+    --grey-text:#666;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:"Microsoft JhengHei","PingFang TC",Arial,sans-serif;
+    font-size:14px; color:#222; background:#f2f2f2;
+  }
+  .app{ display:flex; flex-direction:column; height:100vh; }
+
+  /* 上方標題列 */
+  .titlebar{
+    background:#2f6f8f; color:#fff; padding:6px 12px;
+    display:flex; justify-content:space-between; align-items:center; font-size:13px; gap:8px;
+  }
+  .titlebar .ver{opacity:.8;}
+  .menu-btn{
+    display:none; /* 桌機不需要漢堡選單，手機版才會透過 media query 顯示 */
+    background:none; border:1px solid rgba(255,255,255,.6); color:#fff;
+    font-size:18px; line-height:1; padding:4px 10px; border-radius:4px; cursor:pointer;
+  }
+  .sidebar-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40;
+  }
+  .sidebar-overlay.show{ display:block; }
+
+  /* 工具列（存檔／取消／匯出／匯入…） */
+  .toolbar{
+    background:#f7f7f7; border-bottom:1px solid #ccc; padding:6px 10px;
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  }
+  .toolbar button{
+    padding:6px 14px; border:1px solid #99b; border-radius:4px; background:#fff;
+    cursor:pointer; font-size:13px;
+  }
+  .toolbar button.primary{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  .toolbar button.danger{ background:#e05a5a; color:#fff; border-color:#e05a5a; }
+  .toolbar .sep{ width:1px; background:#ccc; align-self:stretch; margin:0 4px;}
+
+  /* 病人資訊列 */
+  .patientbar{
+    background:#fff; border-bottom:1px solid #ccc; padding:6px 12px;
+    display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:#333;
+  }
+  .patientbar b{ color:#000; }
+
+  .body-wrap{ flex:1; display:flex; overflow:hidden; }
+
+  /* 左側：病人清單 */
+  .sidebar{
+    width:230px; min-width:200px; background:#fff; border-right:1px solid #ccc;
+    display:flex; flex-direction:column;
+  }
+  .shifttabs{ display:flex; gap:4px; padding:6px; background:#2f6f8f; }
+  .shifttabs button{
+    flex:1; padding:8px 4px; border:none; border-radius:4px; background:#5c93ac; color:#fff;
+    font-size:13px; cursor:pointer;
+  }
+  .shifttabs button.active{ background:var(--pink); font-weight:bold; }
+  .sidebar .shead{ padding:8px; font-weight:bold; background:#eee; border-bottom:1px solid #ccc;}
+  .sidebar .plist{ flex:1; overflow-y:auto; }
+  .plist .pitem{
+    padding:8px 10px; border-bottom:1px solid #eee; cursor:pointer;
+  }
+  .plist .pitem:hover{ background:#f5faf3; }
+  .plist .pitem.active{ background:#8fce8f; color:#fff; }
+  .plist .pitem .no{ font-size:12px; color:#888; }
+  .plist .pitem.active .no{ color:#eaffea; }
+
+  .sidebar .hhead{ padding:8px; font-weight:bold; background:#eee; border-top:1px solid #ccc; border-bottom:1px solid #ccc;}
+  .sidebar .history{ max-height:220px; overflow-y:auto; }
+  .history .hitem{ padding:6px 10px; font-size:12px; border-bottom:1px dashed #ddd; cursor:pointer; }
+  .history .hitem:hover{ background:#f5faf3; }
+
+  /* 右側：多頁輸入區 */
+  .main{ flex:1; display:flex; flex-direction:column; background:var(--green-bg); overflow:hidden; }
+
+  .tabs{ display:flex; gap:4px; padding:8px 8px 0 8px; background:var(--green-bg); }
+  .tabs button{
+    flex:1; padding:10px 6px; border:1px solid var(--border); border-bottom:none;
+    background:#cfe6cf; color:#333; cursor:pointer; border-radius:6px 6px 0 0; font-size:14px;
+  }
+  .tabs button.active{ background:var(--pink); color:#fff; font-weight:bold; }
+
+  .recorddate{
+    background:var(--green-bg2); padding:8px 12px; display:flex; gap:10px; align-items:center;
+    border:1px solid var(--border); border-top:none;
+  }
+  .recorddate input{ padding:4px; }
+
+  .panelwrap{ flex:1; overflow-y:auto; padding:10px 14px; background:var(--green-bg2); border:1px solid var(--border); border-top:none;}
+  .tabpanel{ display:none; }
+  .tabpanel.active{ display:block; }
+
+  .group{ margin-bottom:16px; }
+  .gtitle{ font-weight:bold; color:#2b5d2b; margin-bottom:6px; }
+
+  .row{
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+    margin-bottom:8px; padding:4px 0;
+  }
+  .chk{ white-space:nowrap; margin-right:10px; cursor:pointer; }
+  .chk input{ margin-right:4px; }
+  .lbl{ color:var(--grey-text); margin:0 4px; }
+
+  /* 無異常/有異常、左側/右側/平躺 這類按鈕式單選 */
+  .toggle-btn{ display:inline-flex; margin-right:4px; cursor:pointer; }
+  .toggle-btn input{ display:none; }
+  .toggle-btn span{
+    padding:3px 10px; border:1px solid #aaa; border-radius:4px; background:#eee; font-size:12px;
+  }
+  .toggle-btn input:checked + span{ background:var(--blue); color:#fff; border-color:var(--blue);}
+  .toggle-btn input:disabled + span{ opacity:.4; cursor:not-allowed; }
+
+  .subs{ margin-left:6px; }
+  .subs .chk{ font-size:12px; color:#555; }
+
+  input[disabled]{ background:#eee; color:#999; }
+
+  input[type=text].f-text, input[type=number].f-num{
+    border:1px solid #aaa; border-radius:3px; padding:3px 5px;
+  }
+  .unit{ margin:0 6px 0 2px; color:var(--grey-text); font-size:12px; }
+  .pos-pair{ display:inline-flex; align-items:center; gap:2px; margin-right:16px; }
+
+  table.iotable{ border-collapse:collapse; margin-top:6px; width:100%; max-width:520px; }
+  table.iotable th, table.iotable td{ border:1px solid #7fc9c9; padding:5px 8px; text-align:center; }
+  table.iotable th{ background:#5fd0cd; color:#fff; }
+  table.iotable tr.total td{ background:#bfe6bf; font-weight:bold; }
+  table.iotable input{ width:60px; text-align:center; }
+  .delrow-btn{
+    background:#e05a5a; color:#fff; border:none; border-radius:4px;
+    width:26px; height:26px; line-height:1; cursor:pointer; font-size:13px;
+  }
+  .delrow-btn:hover{ background:#c94848; }
+  .addrow-btn{ margin-top:6px; padding:4px 10px; cursor:pointer; }
+
+  .statusbar{
+    background:#eee; border-top:1px solid #ccc; padding:4px 12px; font-size:12px; color:#555;
+    display:flex; justify-content:space-between;
+  }
+
+  /* 說明區塊 */
+  .note{ font-size:12px; color:#777; margin:4px 0 10px; }
+
+  /* ====== 手機版（含平板直式）版面調整 ======
+     設計方式：桌機時左側清單、右側輸入區並排；
+     窄螢幕時左側清單改成「側拉抽屜」，用左上角漢堡選單開關，
+     這樣手機直向操作時右側的輸入表單才有足夠寬度可以點選。 */
+  @media (max-width: 820px){
+    .menu-btn{ display:inline-flex; align-items:center; justify-content:center; }
+    .titlebar > div:not(.menu-btn){ font-size:12px; }
+
+    .toolbar{ padding:6px 8px; }
+    .toolbar button{ padding:8px 10px; font-size:13px; }
+    .toolbar .note{ display:none; } /* 手機畫面窄，說明文字先隱藏，避免擠壓按鈕 */
+
+    .patientbar{ font-size:12px; gap:6px 10px; padding:6px 8px; }
+
+    .sidebar{
+      position:fixed; top:0; left:0; bottom:0; z-index:50;
+      width:82vw; max-width:320px;
+      transform:translateX(-105%);
+      transition:transform .25s ease;
+      box-shadow:2px 0 10px rgba(0,0,0,.35);
+    }
+    .sidebar.open{ transform:translateX(0); }
+
+    .tabs{ padding:6px 6px 0; }
+    .tabs button{ font-size:12px; padding:10px 4px; }
+
+    .recorddate{ font-size:13px; flex-wrap:wrap; }
+
+    .panelwrap{ padding:8px 10px; }
+    .row{ gap:8px 10px; }
+
+    /* 放大可點擊區域，手指比滑鼠游標大很多 */
+    .chk{ min-height:34px; display:inline-flex; align-items:center; margin-right:12px; }
+    .chk input, input[type=checkbox], input[type=radio]{ transform:scale(1.25); margin-right:6px; }
+    .toggle-btn span{ padding:6px 12px; font-size:13px; }
+    input[type=time].f-time{ min-width:88px; padding:6px; }
+    input[type=number].f-num{ padding:6px; }
+    table.iotable input{ width:48px; }
+    .delrow-btn{ width:32px; height:32px; font-size:15px; }
+
+    .statusbar{ font-size:11px; flex-wrap:wrap; gap:2px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="titlebar">
+    <button id="btnMenu" class="menu-btn" aria-label="開啟病人清單">☰</button>
+    <div>[A13] 病房照護紀錄作業 － 網頁示範版</div>
+    <div class="ver">V.DEMO 1.0</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" id="btnSave">💾 存檔(F12)</button>
+    <button id="btnCancel">✖ 取消(F11)</button>
+    <button id="btnCheck">✔ 檢核</button>
+    <div class="sep"></div>
+    <button id="btnExport">⬇ 匯出 XML</button>
+    <button id="btnImport">⬆ 匯入 XML</button>
+    <input type="file" id="fileImport" accept=".xml" style="display:none">
+    <div class="sep"></div>
+    <span class="note">資料全部保存在瀏覽器目前分頁中，離開頁面前請先「匯出 XML」備份。</span>
+  </div>
+
+  <div class="patientbar" id="patientbar"><!-- 由 JS 產生 --></div>
+
+  <div class="body-wrap">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 左側：班別切換 + 病人(床位)清單 + 該病人已存紀錄 -->
+    <div class="sidebar">
+      <div class="shifttabs" id="shiftTabs">
+        <button data-shift="白班">白班</button>
+        <button data-shift="小夜">小夜</button>
+        <button data-shift="大夜">大夜</button>
+      </div>
+      <div class="shead">病人清單（30 床）</div>
+      <div class="plist" id="plist"></div>
+      <div class="hhead" id="hheadLabel">此病人已存照護紀錄</div>
+      <div class="history" id="history"></div>
+    </div>
+
+    <!-- 右側：多頁輸入區 -->
+    <div class="main">
+      <div class="tabs" id="tabs">
+        <button data-tab="1" class="active">身體清潔<br>舒適照護</button>
+        <button data-tab="2">排泄照護</button>
+        <button data-tab="3">膳食與給藥</button>
+        <button data-tab="4">舒適與活動</button>
+        <button data-tab="5">一般技術性</button>
+      </div>
+
+      <div class="recorddate">
+        <span>照顧紀錄日期</span>
+        <input type="date" id="recDate">
+        <span>時間</span>
+        <input type="time" id="recTime">
+        <button id="btnNow" style="margin-left:6px;">帶入現在時間</button>
+      </div>
+
+      <div class="panelwrap">
+        <form id="careForm">
+          <div class="tabpanel active" id="tab1"></div>
+          <div class="tabpanel" id="tab2"></div>
+          <div class="tabpanel" id="tab3"></div>
+          <div class="tabpanel" id="tab4"></div>
+          <div class="tabpanel" id="tab5"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span id="statusLeft">就緒</span>
+    <span id="statusRight"></span>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   A13 照護紀錄輸入系統
+   設計理念：
+   1. 用「病人 Patient」與「照護紀錄 Record」建立資料模型，
+      每筆 Record 底下的欄位用「扁平化的 name/value」儲存，
+      這樣存檔、讀檔、轉 XML 都可以用同一套通用邏輯處理，
+      不用替每一種輸入元件各寫一套轉換規則。
+   2. 畫面上的每一小項（1-1、1-2…）用小函式拼出 HTML，
+      函式名稱對應「這一項長什麼樣子」，方便之後增減項目。
+   3. 「有異常才能勾選細項」這種連動邏輯，統一用
+      data-depends="欄位名:應該的值" 描述，由一個共用函式
+      掃描全表單來決定要不要 disable，不用每個欄位各寫一段。
+   ============================================================ */
+
+/* ---------- 小工具：畫面元件產生器（atom functions） ---------- */
+
+// 一般核取方塊
+function cb(name, label, depends){
+  return `<label class="chk"${depends?` data-depends="${depends}"`:''}>`+
+         `<input type="checkbox" name="${name}" value="true"${depends?` data-depends="${depends}"`:''}> ${label}</label>`;
+}
+
+// 按鈕式單選（例如：無異常/有異常、左側/右側/平躺）
+function radioGroup(name, labels, values, depends){
+  return labels.map((l,i)=>{
+    return `<label class="toggle-btn">`+
+           `<input type="radio" name="${name}" value="${values[i]}"${depends?` data-depends="${depends}"`:''}>`+
+           `<span>${l}</span></label>`;
+  }).join('');
+}
+
+function timeInput(name, depends){
+  return `<input type="time" class="f-time" name="${name}"${depends?` data-depends="${depends}"`:''}>`;
+}
+function numInput(name, unit, depends, width){
+  return `<input type="number" class="f-num" style="width:${width||60}px" name="${name}"${depends?` data-depends="${depends}"`:''}>`+
+         (unit?`<span class="unit">${unit}</span>`:'');
+}
+function textInput(name, placeholder, depends, width){
+  return `<input type="text" class="f-text" style="width:${width||140}px" name="${name}" placeholder="${placeholder||''}"${depends?` data-depends="${depends}"`:''}>`;
+}
+
+/* ---------- 常用組合元件（一個項目常見的樣式） ---------- */
+
+// 「打勾＋無異常/有異常＋異常細項」的一整列，例如 1-1 頭部清潔
+function actionRow(id, label, subs, statusLabels){
+  statusLabels = statusLabels || ['無異常','有異常'];
+  const doneName = id+'_done', statusName = id+'_status';
+  const dep1 = `${doneName}:true`;
+  const dep2 = `${doneName}:true;${statusName}:abnormal`;
+  const subsHtml = subs.map((s,i)=>cb(`${id}_sub${i}`, s, dep2)).join('');
+  return `<div class="row">
+      ${cb(doneName,label)}
+      ${radioGroup(statusName, statusLabels, ['normal','abnormal'], dep1)}
+      <span class="subs">${subsHtml}</span>
+    </div>`;
+}
+
+// 單純「敘述文字＋無/有」，沒有前面的打勾（例如 5-1 使用冰枕）
+function toggleRow(id, label, opts){
+  opts = opts || ['無','有'];
+  const statusName = id+'_status';
+  return `<div class="row"><span class="lbl">${label}</span>${radioGroup(statusName, opts, ['none','has'])}</div>`;
+}
+
+// 一列多個各自獨立的打勾項目
+function checkRow(items){
+  return `<div class="row">${items.map(([n,l])=>cb(n,l)).join('')}</div>`;
+}
+
+// 打勾＋次數＋時間（例如 1-6 換尿布）
+function countTimeRow(id, label, unit, timeLabel){
+  const doneName=id+'_done', dep=`${doneName}:true`;
+  return `<div class="row">${cb(doneName,label)} ${numInput(id+'_count',unit,dep,50)} <span class="lbl">，${timeLabel}</span> ${timeInput(id+'_time',dep)}</div>`;
+}
+
+// 打勾＋多個時間欄位（例如 3-1 鼻胃管灌食）
+function timeSlotsRow(id, label, count){
+  const doneName=id+'_done', dep=`${doneName}:true`;
+  let slots=''; for(let i=0;i<count;i++) slots+=timeInput(`${id}_t${i}`,dep);
+  return `<div class="row">${cb(doneName,label)}${slots}</div>`;
+}
+
+// 主勾選＋「協助：」＋一串同層細項（例如 1-8 更換床單）
+function compoundCheckRow(id, mainLabel, subLabel, subs){
+  const doneName=id+'_done', dep=`${doneName}:true`;
+  const subsHtml = subs.map((s,i)=>cb(`${id}_sub${i}`,s,dep)).join('');
+  return `<div class="row">${cb(doneName,mainLabel)} ${subLabel?`<span class="lbl">${subLabel}</span>`:''} ${subsHtml}</div>`;
+}
+
+// 一列文字說明＋多個各自獨立的打勾（例如 4-5 病人四肢狀況）
+function multiCheckLabelRow(label, items){
+  return `<div class="row"><span class="lbl">${label}</span>${items.map(([n,l])=>cb(n,l)).join('')}</div>`;
+}
+
+// 一個打勾控制多組「文字＋無/有」（例如 4-1 觀察皮膚情形，破皮/紅疹/異味）
+function multiToggleRow(id, mainLabel, toggles){
+  const doneName=id+'_done', dep=`${doneName}:true`;
+  const html = toggles.map(([n,l])=>`<span class="lbl">，${l}</span>${radioGroup(n,['無','有'],['none','has'],dep)}`).join('');
+  return `<div class="row">${cb(doneName,mainLabel)}${html}</div>`;
+}
+
+// 翻身紀錄：多列，每列多組「時間＋左側/右側/平躺」，第一列加禁忌欄
+function positionRows(id, rowsCount, pairsPerRow, tabooId){
+  let out='';
+  for(let r=0;r<rowsCount;r++){
+    let pairs='';
+    for(let p=0;p<pairsPerRow;p++){
+      const idx = r*pairsPerRow+p;
+      pairs += `<span class="pos-pair">${timeInput(`${id}_r${idx}_time`)} ${radioGroup(`${id}_r${idx}_pos`,['左側','右側','平躺'],['left','right','lying'])}</span>`;
+    }
+    const taboo = (r===0) ? `<span class="lbl">禁忌</span>${textInput(tabooId,'',null,180)}` : '';
+    out += `<div class="row">${pairs}${taboo}</div>`;
+  }
+  return out;
+}
+
+function group(code, title, inner){
+  return `<div class="group"><div class="gtitle">${code} ${title}</div>${inner}</div>`;
+}
+
+/* ================= 五大分類內容（對照原表單 1-1 ~ 5-4） ================= */
+
+function buildTab1(){
+  return [
+    group('1-1','頭部清潔', actionRow('c1_11','給予頭部清潔，觀察頭部皮膚',['傷口','紅疹','頭蝨'])),
+    group('1-2','口腔護理', actionRow('c1_12','給予口腔護理，觀察口腔黏膜',['牙齒鬆動','口內潰瘍','舌苔'])),
+    group('1-3','床上擦澡/洗澡',
+      actionRow('c1_13a','已完成擦澡及更換衣物，身體皮膚',['脫屑','紅疹','傷口']) +
+      actionRow('c1_13b','已完成洗澡及更換衣物，身體皮膚',['脫屑','紅疹','傷口'])
+    ),
+    group('1-4','會陰清潔', actionRow('c1_14','給予會陰清潔',['外觀潰瘍','異味','異常分泌物'])),
+    group('1-5','足部清潔', checkRow([['c1_15a','已完成足部清潔'],['c1_15b','協助擦乳液']])),
+    group('1-6','換尿布及協助大小便清潔', countTimeRow('c1_16','換尿布','次','最後一次換尿布時間')),
+    group('1-7','更換(穿脫)衣褲', checkRow([['c1_17a','協助更換衣服'],['c1_17b','協助更換褲子']])),
+    group('1-8','更換床單被服/病床整理', compoundCheckRow('c1_18','已完成病床整理','協助',['床單','中單','枕頭套','太空被'])),
+    group('1-9','指甲修剪', checkRow([['c1_19a','協助修剪指甲'],['c1_19b','協助修剪趾甲']]))
+  ].join('');
+}
+
+function buildTab2(){
+  return [
+    group('2-1','協助便盆椅/尿壺/尿套使用，倒蓄尿袋及清潔',
+      checkRow([['c2_21a','協助便盆椅使用']]) +
+      checkRow([['c2_21b','協助給予尿壺使用']]) +
+      checkRow([['c2_21c','協助給予尿套使用']]) +
+      checkRow([['c2_21d','協助倒蓄尿袋']])
+    ),
+    group('2-2','人工肛門袋更換清潔', checkRow([['c2_22','完成人工肛門袋清潔更換']]))
+  ].join('');
+}
+
+function buildTab3(){
+  return [
+    group('3-1','協助用餐/餵食/鼻胃管灌食/裝開水',
+      checkRow([['c3_31a','協助用餐']]) +
+      checkRow([['c3_31b','協助餵食']]) +
+      checkRow([['c3_31c','協助裝開水']]) +
+      timeSlotsRow('c3_31d','給予鼻胃管灌食',4)
+    ),
+    group('3-2','護理人員指導下協助用藥', checkRow([['c3_32a','完成由口服藥'],['c3_32b','完成鼻胃管服藥']]))
+  ].join('');
+}
+
+function buildTab4(){
+  return [
+    group('4-1','翻身/拍背',
+      positionRows('c4_41', 2, 2, 'c4_41_taboo') +
+      multiToggleRow('c4_41_obs','觀察皮膚情形',[['c4_41_broken','破皮'],['c4_41_rash','紅疹'],['c4_41_smell','異味']]) +
+      checkRow([['c4_41_pat','執行拍背']])
+    ),
+    group('4-2','上下床坐輪椅', checkRow([['c4_42','協助上下床坐輪椅']])),
+    group('4-3','輔具活動',
+      compoundCheckRow('c4_43a','協助輔具使用','',['助行器','拐杖','副木']) +
+      actionRow('c4_43b','觀察活動狀況',['步態不穩','跌倒','肢體疼痛'])
+    ),
+    group('4-4','溫水坐浴環境準備',
+      toggleRow('c4_44a','協助準備溫水坐浴10分鐘') +
+      actionRow('c4_44b','觀察病人反應',['頭痛','頭暈','噁心不適'])
+    ),
+    group('4-5','協助被動運動',
+      compoundCheckRow('c4_45a','協助病人被動運動10次以上','',['上肢','下肢']) +
+      multiCheckLabelRow('病人四肢狀況',[['c4_45_normal','正常'],['c4_45_flex','屈曲'],['c4_45_stiff','僵硬']])
+    )
+  ].join('');
+}
+
+function buildTab5(){
+  const measureRow = `<div class="row">
+      <span class="lbl">輸入量：固體</span>${numInput('c5_53_solid','gm',null,60)}
+      <span class="lbl">；液體</span>${numInput('c5_53_liquid','cc',null,60)}
+    </div>
+    <div class="row">
+      <span class="lbl">輸出量：排便</span>${numInput('c5_53_stoolcount','次',null,50)}
+      ${numInput('c5_53_stoolweight','gm',null,60)}
+    </div>
+    <div class="row">
+      <span class="lbl">尿液</span>${numInput('c5_53_urine','cc',null,60)}
+      <span class="lbl">；引流量</span>${numInput('c5_53_drain','cc',null,60)}
+      <span class="lbl">；其他</span>${textInput('c5_53_other','',null,160)}
+    </div>`;
+
+  const tableHtml = `<table class="iotable">
+      <thead><tr><th>尿</th><th>引流</th><th>屎</th><th>尿與屎</th><th></th></tr></thead>
+      <tbody id="outputTableBody"></tbody>
+      <tfoot><tr class="total"><td id="total_pee">0</td><td id="total_drain">0</td><td id="total_stool">0</td><td id="total_mix">0</td><td></td></tr></tfoot>
+    </table>
+    <button type="button" class="addrow-btn" id="btnAddRow">＋ 新增一列紀錄</button>`;
+
+  return [
+    group('5-1','使用冰枕', toggleRow('c5_51','協助病人使用冰枕10分鐘')),
+    group('5-2','環境介紹', checkRow([['c5_52','已完成環境介紹，可了解']])),
+    group('5-3','記輸出入量',
+      checkRow([['c5_53_done','協助輸出入量紀錄']]) + measureRow + tableHtml
+    ),
+    group('5-4','量身高體重',
+      `<div class="row">${cb('c5_54_done','已完成量測：')}
+        <span class="lbl">身高</span>${numInput('c5_54_height','公分',null,60)}
+        <span class="lbl">，體重</span>${numInput('c5_54_weight','公斤',null,60)}
+      </div>`
+    )
+  ].join('');
+}
+
+/* ================= 病人與紀錄的資料模型 ================= */
+// 為避免顯示到真實病人資料，這裡全部使用示範用的假資料。
+const patients = [
+  { info:{病歷號:'D10001',姓名:'陳永昌',性別:'男',出生:'1956-04-05',年齡:'70',床號:'01床',卡號:'Q08021',醫師:'黃志成',科別:'感染科',身份:'一般',管路:'鼻胃管',血型:'AB+',診斷:'呼吸器依賴狀態'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10002',姓名:'黃孟哲',性別:'男',出生:'1957-09-20',年齡:'69',床號:'02床',卡號:'Q08022',醫師:'陳大文',科別:'感染科',身份:'重大傷病',管路:'',血型:'AB+',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10003',姓名:'徐秀蘭',性別:'女',出生:'1971-03-23',年齡:'55',床號:'03床',卡號:'Q08061',醫師:'蔡明哲',科別:'腎臟內科',身份:'低收入戶',管路:'管灌',血型:'B-',診斷:'肺炎恢復期'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10004',姓名:'張雅婷',性別:'女',出生:'1947-02-12',年齡:'79',床號:'04床',卡號:'Q08062',醫師:'林宗翰',科別:'新陳代謝科',身份:'低收入戶',管路:'',血型:'AB-',診斷:'失智症合併行動不便'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10005',姓名:'潘國雄',性別:'男',出生:'1966-09-10',年齡:'60',床號:'05床',卡號:'Q08063',醫師:'鄭安妮',科別:'腎臟內科',身份:'重大傷病',管路:'',血型:'A-',診斷:'呼吸器依賴狀態'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10006',姓名:'江金龍',性別:'男',出生:'1966-04-28',年齡:'60',床號:'06床',卡號:'Q08081',醫師:'黃志成',科別:'一般外科',身份:'低收入戶',管路:'氣切',血型:'O-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10007',姓名:'鄭靜怡',性別:'女',出生:'1954-12-22',年齡:'72',床號:'07床',卡號:'Q08101',醫師:'黃志成',科別:'新陳代謝科',身份:'重大傷病',管路:'鼻胃管',血型:'B-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10008',姓名:'謝秀蘭',性別:'女',出生:'1936-04-22',年齡:'90',床號:'08床',卡號:'Q08102',醫師:'林宗翰',科別:'胸腔內科',身份:'重大傷病',管路:'',血型:'O-',診斷:'慢性腎臟病'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10009',姓名:'黃靜怡',性別:'女',出生:'1935-12-11',年齡:'91',床號:'09床',卡號:'Q08103',醫師:'吳建宏',科別:'復健科',身份:'榮民',管路:'',血型:'AB-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10010',姓名:'李惠美',性別:'女',出生:'1936-09-09',年齡:'90',床號:'10床',卡號:'Q08121',醫師:'鄭安妮',科別:'一般外科',身份:'榮民',管路:'導尿管',血型:'B-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10011',姓名:'黃美惠',性別:'女',出生:'1968-02-05',年齡:'58',床號:'11床',卡號:'Q08122',醫師:'李佳玲',科別:'一般外科',身份:'一般',管路:'氣切',血型:'AB+',診斷:'脊髓損傷'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10012',姓名:'廖秀蘭',性別:'女',出生:'1936-01-22',年齡:'90',床號:'12床',卡號:'Q08123',醫師:'黃志成',科別:'感染科',身份:'低收入戶',管路:'',血型:'O-',診斷:'腦中風後遺症'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10013',姓名:'洪筱涵',性別:'女',出生:'1942-01-24',年齡:'84',床號:'13床',卡號:'Q08161',醫師:'謝雅雯',科別:'感染科',身份:'重大傷病',管路:'鼻胃管',血型:'A-',診斷:'髖關節置換術後'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10014',姓名:'蕭彩雲',性別:'女',出生:'1939-10-07',年齡:'87',床號:'14床',卡號:'Q08162',醫師:'李佳玲',科別:'腎臟內科',身份:'重大傷病',管路:'鼻胃管',血型:'A+',診斷:'脊髓損傷'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10015',姓名:'曾淑芬',性別:'女',出生:'1964-06-27',年齡:'62',床號:'15床',卡號:'Q08163',醫師:'謝雅雯',科別:'家醫科',身份:'一般',管路:'管灌',血型:'A-',診斷:'腦中風後遺症'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10016',姓名:'蕭雅婷',性別:'女',出生:'1937-03-05',年齡:'89',床號:'16床',卡號:'Q08181',醫師:'楊惠美',科別:'感染科',身份:'重大傷病',管路:'導尿管',血型:'AB+',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10017',姓名:'莊進財',性別:'男',出生:'1946-11-21',年齡:'80',床號:'17床',卡號:'Q08182',醫師:'林宗翰',科別:'復健科',身份:'榮民',管路:'',血型:'B-',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10018',姓名:'許建宏',性別:'男',出生:'1934-09-08',年齡:'92',床號:'18床',卡號:'Q08183',醫師:'鄭安妮',科別:'家醫科',身份:'一般',管路:'',血型:'A+',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10019',姓名:'高俊傑',性別:'男',出生:'1950-02-17',年齡:'76',床號:'19床',卡號:'Q08201',醫師:'吳建宏',科別:'心臟內科',身份:'榮民',管路:'管灌',血型:'B+',診斷:'心臟衰竭'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10020',姓名:'劉玉蘭',性別:'女',出生:'1941-07-07',年齡:'85',床號:'20床',卡號:'Q08202',醫師:'黃志成',科別:'神經內科',身份:'榮民',管路:'導尿管',血型:'AB+',診斷:'慢性腎臟病'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10021',姓名:'羅桂英',性別:'女',出生:'1968-11-21',年齡:'58',床號:'21床',卡號:'Q08203',醫師:'黃志成',科別:'胸腔內科',身份:'榮民',管路:'',血型:'O-',診斷:'肺炎恢復期'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10022',姓名:'劉士豪',性別:'男',出生:'1959-09-15',年齡:'67',床號:'22床',卡號:'Q08221',醫師:'李佳玲',科別:'一般外科',身份:'重大傷病',管路:'導尿管',血型:'AB-',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10023',姓名:'邱彥廷',性別:'男',出生:'1968-11-18',年齡:'58',床號:'23床',卡號:'Q08222',醫師:'陳大文',科別:'神經內科',身份:'重大傷病',管路:'管灌',血型:'AB+',診斷:'巴金森氏症'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10024',姓名:'吳阿珠',性別:'女',出生:'1946-01-06',年齡:'80',床號:'24床',卡號:'Q08223',醫師:'蔡明哲',科別:'胸腔內科',身份:'榮民',管路:'導尿管',血型:'AB-',診斷:'慢性阻塞性肺病'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10025',姓名:'莊桂英',性別:'女',出生:'1936-11-23',年齡:'90',床號:'25床',卡號:'Q08261',醫師:'楊惠美',科別:'骨科',身份:'重大傷病',管路:'導尿管',血型:'B-',診斷:'呼吸器依賴狀態'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10026',姓名:'呂文雄',性別:'男',出生:'1968-01-19',年齡:'58',床號:'26床',卡號:'Q08262',醫師:'楊惠美',科別:'感染科',身份:'重大傷病',管路:'',血型:'A-',診斷:'髖關節置換術後'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10027',姓名:'黃冠宇',性別:'男',出生:'1956-07-04',年齡:'70',床號:'27床',卡號:'Q08263',醫師:'鄭安妮',科別:'家醫科',身份:'一般',管路:'鼻胃管',血型:'A-',診斷:'慢性腎臟病'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10028',姓名:'潘秀蘭',性別:'女',出生:'1958-11-23',年齡:'68',床號:'28床',卡號:'Q08281',醫師:'林宗翰',科別:'家醫科',身份:'低收入戶',管路:'氣切',血型:'B+',診斷:'壓瘡照護'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10029',姓名:'邱月娥',性別:'女',出生:'1967-01-15',年齡:'59',床號:'29床',卡號:'Q08282',醫師:'鄭安妮',科別:'新陳代謝科',身份:'一般',管路:'',血型:'B-',診斷:'失智症合併行動不便'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10030',姓名:'李燕如',性別:'女',出生:'1949-02-08',年齡:'77',床號:'30床',卡號:'Q08283',醫師:'林宗翰',科別:'心臟內科',身份:'重大傷病',管路:'氣切',血型:'O+',診斷:'脊髓損傷'}, records:{白班:[],小夜:[],大夜:[]} },
+];
+let currentPatientIndex = 0;
+
+/* ================= 畫面初始化 ================= */
+const form = document.getElementById('careForm');
+
+function init(){
+  document.getElementById('tab1').innerHTML = buildTab1();
+  document.getElementById('tab2').innerHTML = buildTab2();
+  document.getElementById('tab3').innerHTML = buildTab3();
+  document.getElementById('tab4').innerHTML = buildTab4();
+  document.getElementById('tab5').innerHTML = buildTab5();
+
+  addTableRow(); // 5-3 表格預設一列
+  renderShiftTabs();
+  renderPatientList();
+  renderPatientBar();
+  renderHistory();
+  updateStatusRight();
+  setNow();
+  updateDependencies();
+
+  // 分頁切換
+  document.querySelectorAll('#tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>switchTab(btn.dataset.tab));
+  });
+
+  // 班別切換：白班／小夜／大夜，共用同 30 床，各自累積自己的已存紀錄
+  document.querySelectorAll('#shiftTabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      currentShift = btn.dataset.shift;
+      renderShiftTabs();
+      renderPatientList();
+      renderPatientBar();
+      renderHistory();
+    });
+  });
+
+  form.addEventListener('change', updateDependencies);
+
+  document.getElementById('btnSave').addEventListener('click', saveRecord);
+  document.getElementById('btnCancel').addEventListener('click', ()=>{
+    if(confirm('確定要清空目前輸入內容嗎？')) resetForm();
+  });
+  document.getElementById('btnCheck').addEventListener('click', ()=>{
+    alert('檢核完成，未發現必填欄位缺漏（示範版未設定強制必填規則）。');
+  });
+  document.getElementById('btnExport').addEventListener('click', exportXml);
+  document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('fileImport').click());
+  document.getElementById('fileImport').addEventListener('change', handleImportFile);
+  document.getElementById('btnNow').addEventListener('click', setNow);
+
+  // 手機版：漢堡選單開關左側病人清單
+  document.getElementById('btnMenu').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebarOverlay').addEventListener('click', closeSidebarOnMobile);
+}
+
+/* ---------- 手機版側欄開關 ---------- */
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebarOnMobile(){
+  if(window.innerWidth > 820) return;
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+function switchTab(n){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===String(n)));
+  document.querySelectorAll('.tabpanel').forEach((p,i)=>p.classList.toggle('active', (i+1)===Number(n)));
+}
+
+function setNow(){
+  const d = new Date();
+  document.getElementById('recDate').value = d.toISOString().slice(0,10);
+  document.getElementById('recTime').value = d.toTimeString().slice(0,5);
+}
+
+/* ---------- 依賴（連動 disable）引擎 ---------- */
+function evalDepends(condStr){
+  return condStr.split(';').every(pair=>{
+    const [name,val] = pair.split(':');
+    const el = form.elements[name];
+    if(!el) return false;
+    if(el instanceof RadioNodeList){
+      return el.value === val; // RadioNodeList.value 會回傳目前被選取的那個 value
+    }
+    if(el.type === 'checkbox') return String(el.checked) === val;
+    return el.value === val;
+  });
+}
+function updateDependencies(){
+  form.querySelectorAll('[data-depends]').forEach(el=>{
+    const ok = evalDepends(el.dataset.depends);
+    el.disabled = !ok;
+    if(!ok){
+      if(el.type==='checkbox' || el.type==='radio') el.checked = false;
+      else el.value = '';
+    }
+  });
+}
+
+/* ---------- 5-3 動態表格（可新增、可刪除列） ----------
+   idx 用來組成每個輸入框的 name（例如 c5_53_tbl_3_pee），
+   用一個只會遞增、不會重複使用的計數器 outputRowSeq 來產生 idx，
+   這樣「刪除中間那列、再新增一列」也不會撞名。
+   讀取舊紀錄時（loadRecord）則改用 addTableRowWithIndex，
+   直接沿用該筆紀錄原本存的 idx，欄位才能正確對回去。 */
+let outputRowSeq = 0;
+
+function createOutputRow(idx){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="number" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
+    <td><input type="number" class="tbl-drain" name="c5_53_tbl_${idx}_drain"></td>
+    <td><input type="number" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
+    <td><input type="number" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
+    <td><button type="button" class="delrow-btn" title="刪除此列">✕</button></td>`;
+  return tr;
+}
+
+function addTableRow(){
+  const tbody = document.getElementById('outputTableBody');
+  const idx = outputRowSeq++;
+  tbody.appendChild(createOutputRow(idx));
+}
+
+function addTableRowWithIndex(idx){
+  const tbody = document.getElementById('outputTableBody');
+  tbody.appendChild(createOutputRow(idx));
+  if(idx >= outputRowSeq) outputRowSeq = idx + 1;
+}
+
+function deleteTableRow(trEl){
+  const tbody = document.getElementById('outputTableBody');
+  if(tbody.children.length <= 1){
+    alert('至少要保留一列。');
+    return;
+  }
+  trEl.remove();
+  recalcTotals();
+}
+
+document.addEventListener('input', (e)=>{
+  if(e.target.matches('#outputTableBody input')) recalcTotals();
+});
+function recalcTotals(){
+  const cols = ['pee','drain','stool','mix'];
+  cols.forEach(c=>{
+    let sum = 0;
+    document.querySelectorAll(`.tbl-${c}`).forEach(inp=>{ sum += Number(inp.value)||0; });
+    document.getElementById(`total_${c}`).textContent = sum;
+  });
+}
+function resetOutputTable(){
+  document.getElementById('outputTableBody').innerHTML = '';
+  outputRowSeq = 0;
+  addTableRow();
+  recalcTotals();
+}
+
+// 綁定新增列／刪除列按鈕（buildTab5 用 innerHTML 產生，需在 init 之後綁定，
+// 用事件委派最簡單）
+document.addEventListener('click', (e)=>{
+  if(e.target.id === 'btnAddRow'){ addTableRow(); recalcTotals(); }
+  if(e.target.classList.contains('delrow-btn')){ deleteTableRow(e.target.closest('tr')); }
+});
+
+/* ---------- 班別 ---------- */
+// 30 床 x 3 班別 = 90 筆可儲存的資料格，班別只影響「存到哪一格 / 看哪一格的歷史紀錄」，
+// 病人（床位）清單本身三個班別完全共用同一份 30 筆病人基本資料。
+const SHIFTS = ['白班','小夜','大夜'];
+let currentShift = '白班';
+
+function renderShiftTabs(){
+  document.querySelectorAll('#shiftTabs button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.shift===currentShift);
+  });
+}
+
+/* ---------- 病人清單 / 病人資訊列 ---------- */
+function renderPatientList(){
+  const box = document.getElementById('plist');
+  box.innerHTML = patients.map((p,i)=>{
+    const count = (p.records[currentShift]||[]).length;
+    return `
+    <div class="pitem ${i===currentPatientIndex?'active':''}" data-idx="${i}">
+      <div>${p.info.床號||''} ${p.info.姓名} <span class="no">${p.info.性別}</span></div>
+      <div class="no">${p.info.病歷號}｜${p.info.卡號}${count?`｜本班已存 ${count} 筆`:''}</div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.pitem').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      currentPatientIndex = Number(el.dataset.idx);
+      renderPatientList();
+      renderPatientBar();
+      renderHistory();
+      closeSidebarOnMobile();
+    });
+  });
+}
+
+function renderPatientBar(){
+  const p = patients[currentPatientIndex].info;
+  const bar = document.getElementById('patientbar');
+  bar.innerHTML = `
+    <span>班別：<b>${currentShift}</b></span>
+    <span>床號：<b>${p.床號||'—'}</b></span>
+    <span>病歷號：<b>${p.病歷號}</b></span>
+    <span>姓名：<b>${p.姓名}</b></span>
+    <span>性別：<b>${p.性別}</b></span>
+    <span>出生：<b>${p.出生}</b></span>
+    <span>年齡：<b>${p.年齡}</b></span>
+    <span>卡號：<b>${p.卡號}</b></span>
+    <span>醫師：<b>${p.醫師}</b></span>
+    <span>科別：<b>${p.科別}</b></span>
+    <span>身份：<b>${p.身份}</b></span>
+    <span>管路：<b>${p.管路||'—'}</b></span>
+    <span>血型：<b>${p.血型}</b></span>
+    <span>診斷：<b>${p.診斷}</b></span>
+  `;
+}
+
+function renderHistory(){
+  const p = patients[currentPatientIndex];
+  const list = p.records[currentShift] || [];
+  const box = document.getElementById('history');
+  document.getElementById('hheadLabel').textContent = `此病人「${currentShift}」已存照護紀錄`;
+  if(list.length===0){ box.innerHTML = '<div class="hitem" style="color:#999;">尚無紀錄</div>'; return; }
+  box.innerHTML = list.map((r,i)=>`<div class="hitem" data-idx="${i}">${r.date} ${r.time}</div>`).join('');
+  box.querySelectorAll('.hitem').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(el.dataset.idx===undefined) return;
+      loadRecord(list[Number(el.dataset.idx)]);
+    });
+  });
+}
+
+/* ---------- 儲存進度統計（30 床 x 3 班別 = 90 筆） ---------- */
+function updateStatusRight(){
+  let count = 0;
+  patients.forEach(p=>{ SHIFTS.forEach(s=>{ count += (p.records[s]||[]).length; }); });
+  document.getElementById('statusRight').textContent = `已儲存紀錄：${count} 筆（30 床 × 3 班別 = 90 格）`;
+}
+
+/* ---------- 表單 <-> 資料 ---------- */
+function serializeForm(){
+  const data = {};
+  new FormData(form).forEach((v,k)=>{ data[k]=v; });
+  // FormData 不會帶出「未勾選」的checkbox，這裡補上 false，讓匯出的紀錄完整可讀
+  form.querySelectorAll('input[type=checkbox]').forEach(chk=>{
+    if(!(chk.name in data)) data[chk.name] = 'false';
+  });
+  return data;
+}
+
+function setFieldValue(el, val){
+  if(!el) return;
+  if(el instanceof RadioNodeList){
+    Array.from(el).forEach(r=>{ r.checked = (r.value===val); });
+  } else if(el.type === 'checkbox'){
+    el.checked = (val === 'true');
+  } else {
+    el.value = val;
+  }
+}
+
+function resetForm(){
+  form.reset();
+  resetOutputTable();
+  updateDependencies();
+  setNow();
+}
+
+function saveRecord(){
+  const rec = {
+    date: document.getElementById('recDate').value,
+    time: document.getElementById('recTime').value,
+    fields: serializeForm()
+  };
+  patients[currentPatientIndex].records[currentShift].push(rec);
+  renderPatientList();
+  renderHistory();
+  updateStatusRight();
+  document.getElementById('statusLeft').textContent = `已儲存 ${patients[currentPatientIndex].info.姓名}（${currentShift}）的照護紀錄（${rec.date} ${rec.time}）`;
+}
+
+function loadRecord(rec){
+  form.reset();
+  document.getElementById('outputTableBody').innerHTML = '';
+  outputRowSeq = 0;
+  // 依已存欄位判斷 5-3 表格原本有哪幾列（可能因為使用者刪過列而不連續），
+  // 用 addTableRowWithIndex 依原本的 idx 重建，欄位名稱才能對得回去
+  const tblIdxs = new Set();
+  Object.keys(rec.fields).forEach(k=>{
+    const m = k.match(/^c5_53_tbl_(\d+)_/);
+    if(m) tblIdxs.add(Number(m[1]));
+  });
+  if(tblIdxs.size === 0){
+    addTableRow();
+  } else {
+    Array.from(tblIdxs).sort((a,b)=>a-b).forEach(idx=>addTableRowWithIndex(idx));
+  }
+
+  Object.entries(rec.fields).forEach(([name,val])=>{
+    setFieldValue(form.elements[name], val);
+  });
+  document.getElementById('recDate').value = rec.date;
+  document.getElementById('recTime').value = rec.time;
+  updateDependencies();
+  recalcTotals();
+  switchTab(1);
+  document.getElementById('statusLeft').textContent = `已載入 ${rec.date} ${rec.time} 的照護紀錄`;
+}
+
+/* ---------- XML 匯出 / 匯入 ---------- */
+function buildXmlDoc(){
+  const doc = document.implementation.createDocument('', 'A13照護資料', null);
+  const root = doc.documentElement;
+  patients.forEach(p=>{
+    const pEl = doc.createElement('病人');
+    Object.entries(p.info).forEach(([k,v])=> pEl.setAttribute(k, v==null?'':String(v)));
+    // 每位病人的紀錄依「班別」分開儲存：白班／小夜／大夜，共 30 床 x 3 班別 = 90 筆資料格
+    SHIFTS.forEach(shift=>{
+      (p.records[shift]||[]).forEach(rec=>{
+        const rEl = doc.createElement('紀錄');
+        rEl.setAttribute('班別', shift);
+        rEl.setAttribute('日期', rec.date||'');
+        rEl.setAttribute('時間', rec.time||'');
+        Object.entries(rec.fields).forEach(([k,v])=>{
+          const fEl = doc.createElement('欄位');
+          fEl.setAttribute('名稱', k);
+          fEl.textContent = v==null?'':String(v);
+          rEl.appendChild(fEl);
+        });
+        pEl.appendChild(rEl);
+      });
+    });
+    root.appendChild(pEl);
+  });
+  return doc;
+}
+
+// 簡易 XML 縮排排版，方便打開檔案時人眼閱讀
+function formatXml(xml){
+  let formatted = '';
+  let indent = '';
+  xml.split(/>\s*</).forEach(node=>{
+    if(node.match(/^\/\w/)) indent = indent.substring(2);
+    formatted += indent + '<' + node + '>\n';
+    if(node.match(/^<?\w[^>]*[^/]$/) && !node.startsWith('?')) indent += '  ';
+  });
+  return formatted.substring(1, formatted.length-2);
+}
+
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10).replace(/-/g,'');
+}
+
+function exportXml(){
+  const doc = buildXmlDoc();
+  let xmlStr = new XMLSerializer().serializeToString(doc);
+  xmlStr = formatXml(xmlStr);
+  const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n'+xmlStr], {type:'application/xml'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `A13照護資料_${todayStr()}.xml`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function handleImportFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=> importXml(reader.result);
+  reader.readAsText(file, 'UTF-8');
+  e.target.value = '';
+}
+
+function importXml(text){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'application/xml');
+  if(doc.querySelector('parsererror')){ alert('匯入失敗：XML 格式錯誤。'); return; }
+
+  doc.querySelectorAll('病人').forEach(pEl=>{
+    const info = {};
+    Array.from(pEl.attributes).forEach(a=> info[a.name]=a.value);
+    let patient = patients.find(p=>p.info.病歷號 === info.病歷號);
+    if(!patient){
+      patient = { info, records:{白班:[],小夜:[],大夜:[]} };
+      patients.push(patient);
+    } else {
+      patient.info = info;
+    }
+    patient.records = { 白班:[], 小夜:[], 大夜:[] };
+    pEl.querySelectorAll('紀錄').forEach(rEl=>{
+      const fields = {};
+      rEl.querySelectorAll('欄位').forEach(fEl=>{
+        fields[fEl.getAttribute('名稱')] = fEl.textContent;
+      });
+      // 舊版檔案（匯出時還沒有班別分類）一律視為白班，維持可以匯入
+      const shift = rEl.getAttribute('班別') || '白班';
+      if(!patient.records[shift]) patient.records[shift] = [];
+      patient.records[shift].push({ date: rEl.getAttribute('日期'), time: rEl.getAttribute('時間'), fields });
+    });
+  });
+
+  currentPatientIndex = 0;
+  renderPatientList();
+  renderPatientBar();
+  renderHistory();
+  updateStatusRight();
+  alert('匯入完成！');
+}
+
+init();
+</script>
+</body>
+</html>
