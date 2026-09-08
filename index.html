@@ -505,36 +505,36 @@ function buildTab5(){
 /* ================= 病人與紀錄的資料模型 ================= */
 // 為避免顯示到真實病人資料，這裡全部使用示範用的假資料。
 const patients = [
-  { info:{病歷號:'D10001',姓名:'陳永昌',性別:'男',出生:'1956-04-05',年齡:'70',床號:'01床',卡號:'Q08021',醫師:'黃志成',科別:'感染科',身份:'一般',管路:'鼻胃管',血型:'AB+',診斷:'呼吸器依賴狀態'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10002',姓名:'黃孟哲',性別:'男',出生:'1957-09-20',年齡:'69',床號:'02床',卡號:'Q08022',醫師:'陳大文',科別:'感染科',身份:'重大傷病',管路:'',血型:'AB+',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10003',姓名:'徐秀蘭',性別:'女',出生:'1971-03-23',年齡:'55',床號:'03床',卡號:'Q08061',醫師:'蔡明哲',科別:'腎臟內科',身份:'低收入戶',管路:'管灌',血型:'B-',診斷:'肺炎恢復期'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10004',姓名:'張雅婷',性別:'女',出生:'1947-02-12',年齡:'79',床號:'04床',卡號:'Q08062',醫師:'林宗翰',科別:'新陳代謝科',身份:'低收入戶',管路:'',血型:'AB-',診斷:'失智症合併行動不便'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10005',姓名:'潘國雄',性別:'男',出生:'1966-09-10',年齡:'60',床號:'05床',卡號:'Q08063',醫師:'鄭安妮',科別:'腎臟內科',身份:'重大傷病',管路:'',血型:'A-',診斷:'呼吸器依賴狀態'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10006',姓名:'江金龍',性別:'男',出生:'1966-04-28',年齡:'60',床號:'06床',卡號:'Q08081',醫師:'黃志成',科別:'一般外科',身份:'低收入戶',管路:'氣切',血型:'O-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10007',姓名:'鄭靜怡',性別:'女',出生:'1954-12-22',年齡:'72',床號:'07床',卡號:'Q08101',醫師:'黃志成',科別:'新陳代謝科',身份:'重大傷病',管路:'鼻胃管',血型:'B-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10008',姓名:'謝秀蘭',性別:'女',出生:'1936-04-22',年齡:'90',床號:'08床',卡號:'Q08102',醫師:'林宗翰',科別:'胸腔內科',身份:'重大傷病',管路:'',血型:'O-',診斷:'慢性腎臟病'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10009',姓名:'黃靜怡',性別:'女',出生:'1935-12-11',年齡:'91',床號:'09床',卡號:'Q08103',醫師:'吳建宏',科別:'復健科',身份:'榮民',管路:'',血型:'AB-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10010',姓名:'李惠美',性別:'女',出生:'1936-09-09',年齡:'90',床號:'10床',卡號:'Q08121',醫師:'鄭安妮',科別:'一般外科',身份:'榮民',管路:'導尿管',血型:'B-',診斷:'股骨骨折術後'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10011',姓名:'黃美惠',性別:'女',出生:'1968-02-05',年齡:'58',床號:'11床',卡號:'Q08122',醫師:'李佳玲',科別:'一般外科',身份:'一般',管路:'氣切',血型:'AB+',診斷:'脊髓損傷'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10012',姓名:'廖秀蘭',性別:'女',出生:'1936-01-22',年齡:'90',床號:'12床',卡號:'Q08123',醫師:'黃志成',科別:'感染科',身份:'低收入戶',管路:'',血型:'O-',診斷:'腦中風後遺症'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10013',姓名:'洪筱涵',性別:'女',出生:'1942-01-24',年齡:'84',床號:'13床',卡號:'Q08161',醫師:'謝雅雯',科別:'感染科',身份:'重大傷病',管路:'鼻胃管',血型:'A-',診斷:'髖關節置換術後'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10014',姓名:'蕭彩雲',性別:'女',出生:'1939-10-07',年齡:'87',床號:'14床',卡號:'Q08162',醫師:'李佳玲',科別:'腎臟內科',身份:'重大傷病',管路:'鼻胃管',血型:'A+',診斷:'脊髓損傷'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10015',姓名:'曾淑芬',性別:'女',出生:'1964-06-27',年齡:'62',床號:'15床',卡號:'Q08163',醫師:'謝雅雯',科別:'家醫科',身份:'一般',管路:'管灌',血型:'A-',診斷:'腦中風後遺症'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10016',姓名:'蕭雅婷',性別:'女',出生:'1937-03-05',年齡:'89',床號:'16床',卡號:'Q08181',醫師:'楊惠美',科別:'感染科',身份:'重大傷病',管路:'導尿管',血型:'AB+',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10017',姓名:'莊進財',性別:'男',出生:'1946-11-21',年齡:'80',床號:'17床',卡號:'Q08182',醫師:'林宗翰',科別:'復健科',身份:'榮民',管路:'',血型:'B-',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10018',姓名:'許建宏',性別:'男',出生:'1934-09-08',年齡:'92',床號:'18床',卡號:'Q08183',醫師:'鄭安妮',科別:'家醫科',身份:'一般',管路:'',血型:'A+',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10019',姓名:'高俊傑',性別:'男',出生:'1950-02-17',年齡:'76',床號:'19床',卡號:'Q08201',醫師:'吳建宏',科別:'心臟內科',身份:'榮民',管路:'管灌',血型:'B+',診斷:'心臟衰竭'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10020',姓名:'劉玉蘭',性別:'女',出生:'1941-07-07',年齡:'85',床號:'20床',卡號:'Q08202',醫師:'黃志成',科別:'神經內科',身份:'榮民',管路:'導尿管',血型:'AB+',診斷:'慢性腎臟病'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10021',姓名:'羅桂英',性別:'女',出生:'1968-11-21',年齡:'58',床號:'21床',卡號:'Q08203',醫師:'黃志成',科別:'胸腔內科',身份:'榮民',管路:'',血型:'O-',診斷:'肺炎恢復期'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10022',姓名:'劉士豪',性別:'男',出生:'1959-09-15',年齡:'67',床號:'22床',卡號:'Q08221',醫師:'李佳玲',科別:'一般外科',身份:'重大傷病',管路:'導尿管',血型:'AB-',診斷:'長期臥床照護'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10023',姓名:'邱彥廷',性別:'男',出生:'1968-11-18',年齡:'58',床號:'23床',卡號:'Q08222',醫師:'陳大文',科別:'神經內科',身份:'重大傷病',管路:'管灌',血型:'AB+',診斷:'巴金森氏症'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10024',姓名:'吳阿珠',性別:'女',出生:'1946-01-06',年齡:'80',床號:'24床',卡號:'Q08223',醫師:'蔡明哲',科別:'胸腔內科',身份:'榮民',管路:'導尿管',血型:'AB-',診斷:'慢性阻塞性肺病'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10025',姓名:'莊桂英',性別:'女',出生:'1936-11-23',年齡:'90',床號:'25床',卡號:'Q08261',醫師:'楊惠美',科別:'骨科',身份:'重大傷病',管路:'導尿管',血型:'B-',診斷:'呼吸器依賴狀態'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10026',姓名:'呂文雄',性別:'男',出生:'1968-01-19',年齡:'58',床號:'26床',卡號:'Q08262',醫師:'楊惠美',科別:'感染科',身份:'重大傷病',管路:'',血型:'A-',診斷:'髖關節置換術後'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10027',姓名:'黃冠宇',性別:'男',出生:'1956-07-04',年齡:'70',床號:'27床',卡號:'Q08263',醫師:'鄭安妮',科別:'家醫科',身份:'一般',管路:'鼻胃管',血型:'A-',診斷:'慢性腎臟病'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10028',姓名:'潘秀蘭',性別:'女',出生:'1958-11-23',年齡:'68',床號:'28床',卡號:'Q08281',醫師:'林宗翰',科別:'家醫科',身份:'低收入戶',管路:'氣切',血型:'B+',診斷:'壓瘡照護'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10029',姓名:'邱月娥',性別:'女',出生:'1967-01-15',年齡:'59',床號:'29床',卡號:'Q08282',醫師:'鄭安妮',科別:'新陳代謝科',身份:'一般',管路:'',血型:'B-',診斷:'失智症合併行動不便'}, records:{白班:[],小夜:[],大夜:[]} },
-  { info:{病歷號:'D10030',姓名:'李燕如',性別:'女',出生:'1949-02-08',年齡:'77',床號:'30床',卡號:'Q08283',醫師:'林宗翰',科別:'心臟內科',身份:'重大傷病',管路:'氣切',血型:'O+',診斷:'脊髓損傷'}, records:{白班:[],小夜:[],大夜:[]} },
+  { info:{病歷號:'D10001',姓名:'陳永昌',性別:'男',出生:'1956-04-05',年齡:'70',床號:'01床',卡號:'Q08021',醫師:'黃志成',科別:'感染科',身份:'一般',管路:'鼻胃管',血型:'AB+',診斷:'呼吸器依賴狀態'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10002',姓名:'黃孟哲',性別:'男',出生:'1957-09-20',年齡:'69',床號:'02床',卡號:'Q08022',醫師:'陳大文',科別:'感染科',身份:'重大傷病',管路:'',血型:'AB+',診斷:'長期臥床照護'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10003',姓名:'徐秀蘭',性別:'女',出生:'1971-03-23',年齡:'55',床號:'03床',卡號:'Q08061',醫師:'蔡明哲',科別:'腎臟內科',身份:'低收入戶',管路:'管灌',血型:'B-',診斷:'肺炎恢復期'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10004',姓名:'張雅婷',性別:'女',出生:'1947-02-12',年齡:'79',床號:'04床',卡號:'Q08062',醫師:'林宗翰',科別:'新陳代謝科',身份:'低收入戶',管路:'',血型:'AB-',診斷:'失智症合併行動不便'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10005',姓名:'潘國雄',性別:'男',出生:'1966-09-10',年齡:'60',床號:'05床',卡號:'Q08063',醫師:'鄭安妮',科別:'腎臟內科',身份:'重大傷病',管路:'',血型:'A-',診斷:'呼吸器依賴狀態'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10006',姓名:'江金龍',性別:'男',出生:'1966-04-28',年齡:'60',床號:'06床',卡號:'Q08081',醫師:'黃志成',科別:'一般外科',身份:'低收入戶',管路:'氣切',血型:'O-',診斷:'股骨骨折術後'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10007',姓名:'鄭靜怡',性別:'女',出生:'1954-12-22',年齡:'72',床號:'07床',卡號:'Q08101',醫師:'黃志成',科別:'新陳代謝科',身份:'重大傷病',管路:'鼻胃管',血型:'B-',診斷:'股骨骨折術後'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10008',姓名:'謝秀蘭',性別:'女',出生:'1936-04-22',年齡:'90',床號:'08床',卡號:'Q08102',醫師:'林宗翰',科別:'胸腔內科',身份:'重大傷病',管路:'',血型:'O-',診斷:'慢性腎臟病'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10009',姓名:'黃靜怡',性別:'女',出生:'1935-12-11',年齡:'91',床號:'09床',卡號:'Q08103',醫師:'吳建宏',科別:'復健科',身份:'榮民',管路:'',血型:'AB-',診斷:'股骨骨折術後'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10010',姓名:'李惠美',性別:'女',出生:'1936-09-09',年齡:'90',床號:'10床',卡號:'Q08121',醫師:'鄭安妮',科別:'一般外科',身份:'榮民',管路:'導尿管',血型:'B-',診斷:'股骨骨折術後'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10011',姓名:'黃美惠',性別:'女',出生:'1968-02-05',年齡:'58',床號:'11床',卡號:'Q08122',醫師:'李佳玲',科別:'一般外科',身份:'一般',管路:'氣切',血型:'AB+',診斷:'脊髓損傷'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10012',姓名:'廖秀蘭',性別:'女',出生:'1936-01-22',年齡:'90',床號:'12床',卡號:'Q08123',醫師:'黃志成',科別:'感染科',身份:'低收入戶',管路:'',血型:'O-',診斷:'腦中風後遺症'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10013',姓名:'洪筱涵',性別:'女',出生:'1942-01-24',年齡:'84',床號:'13床',卡號:'Q08161',醫師:'謝雅雯',科別:'感染科',身份:'重大傷病',管路:'鼻胃管',血型:'A-',診斷:'髖關節置換術後'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10014',姓名:'蕭彩雲',性別:'女',出生:'1939-10-07',年齡:'87',床號:'14床',卡號:'Q08162',醫師:'李佳玲',科別:'腎臟內科',身份:'重大傷病',管路:'鼻胃管',血型:'A+',診斷:'脊髓損傷'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10015',姓名:'曾淑芬',性別:'女',出生:'1964-06-27',年齡:'62',床號:'15床',卡號:'Q08163',醫師:'謝雅雯',科別:'家醫科',身份:'一般',管路:'管灌',血型:'A-',診斷:'腦中風後遺症'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10016',姓名:'蕭雅婷',性別:'女',出生:'1937-03-05',年齡:'89',床號:'16床',卡號:'Q08181',醫師:'楊惠美',科別:'感染科',身份:'重大傷病',管路:'導尿管',血型:'AB+',診斷:'長期臥床照護'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10017',姓名:'莊進財',性別:'男',出生:'1946-11-21',年齡:'80',床號:'17床',卡號:'Q08182',醫師:'林宗翰',科別:'復健科',身份:'榮民',管路:'',血型:'B-',診斷:'長期臥床照護'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10018',姓名:'許建宏',性別:'男',出生:'1934-09-08',年齡:'92',床號:'18床',卡號:'Q08183',醫師:'鄭安妮',科別:'家醫科',身份:'一般',管路:'',血型:'A+',診斷:'長期臥床照護'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10019',姓名:'高俊傑',性別:'男',出生:'1950-02-17',年齡:'76',床號:'19床',卡號:'Q08201',醫師:'吳建宏',科別:'心臟內科',身份:'榮民',管路:'管灌',血型:'B+',診斷:'心臟衰竭'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10020',姓名:'劉玉蘭',性別:'女',出生:'1941-07-07',年齡:'85',床號:'20床',卡號:'Q08202',醫師:'黃志成',科別:'神經內科',身份:'榮民',管路:'導尿管',血型:'AB+',診斷:'慢性腎臟病'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10021',姓名:'羅桂英',性別:'女',出生:'1968-11-21',年齡:'58',床號:'21床',卡號:'Q08203',醫師:'黃志成',科別:'胸腔內科',身份:'榮民',管路:'',血型:'O-',診斷:'肺炎恢復期'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10022',姓名:'劉士豪',性別:'男',出生:'1959-09-15',年齡:'67',床號:'22床',卡號:'Q08221',醫師:'李佳玲',科別:'一般外科',身份:'重大傷病',管路:'導尿管',血型:'AB-',診斷:'長期臥床照護'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10023',姓名:'邱彥廷',性別:'男',出生:'1968-11-18',年齡:'58',床號:'23床',卡號:'Q08222',醫師:'陳大文',科別:'神經內科',身份:'重大傷病',管路:'管灌',血型:'AB+',診斷:'巴金森氏症'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10024',姓名:'吳阿珠',性別:'女',出生:'1946-01-06',年齡:'80',床號:'24床',卡號:'Q08223',醫師:'蔡明哲',科別:'胸腔內科',身份:'榮民',管路:'導尿管',血型:'AB-',診斷:'慢性阻塞性肺病'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10025',姓名:'莊桂英',性別:'女',出生:'1936-11-23',年齡:'90',床號:'25床',卡號:'Q08261',醫師:'楊惠美',科別:'骨科',身份:'重大傷病',管路:'導尿管',血型:'B-',診斷:'呼吸器依賴狀態'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10026',姓名:'呂文雄',性別:'男',出生:'1968-01-19',年齡:'58',床號:'26床',卡號:'Q08262',醫師:'楊惠美',科別:'感染科',身份:'重大傷病',管路:'',血型:'A-',診斷:'髖關節置換術後'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10027',姓名:'黃冠宇',性別:'男',出生:'1956-07-04',年齡:'70',床號:'27床',卡號:'Q08263',醫師:'鄭安妮',科別:'家醫科',身份:'一般',管路:'鼻胃管',血型:'A-',診斷:'慢性腎臟病'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10028',姓名:'潘秀蘭',性別:'女',出生:'1958-11-23',年齡:'68',床號:'28床',卡號:'Q08281',醫師:'林宗翰',科別:'家醫科',身份:'低收入戶',管路:'氣切',血型:'B+',診斷:'壓瘡照護'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10029',姓名:'邱月娥',性別:'女',出生:'1967-01-15',年齡:'59',床號:'29床',卡號:'Q08282',醫師:'鄭安妮',科別:'新陳代謝科',身份:'一般',管路:'',血型:'B-',診斷:'失智症合併行動不便'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
+  { info:{病歷號:'D10030',姓名:'李燕如',性別:'女',出生:'1949-02-08',年齡:'77',床號:'30床',卡號:'Q08283',醫師:'林宗翰',科別:'心臟內科',身份:'重大傷病',管路:'氣切',血型:'O+',診斷:'脊髓損傷'}, slots:{白班:{fields:{},date:'',time:'',saved:false,savedAt:''},小夜:{fields:{},date:'',time:'',saved:false,savedAt:''},大夜:{fields:{},date:'',time:'',saved:false,savedAt:''}} },
 ];
 let currentPatientIndex = 0;
 
@@ -548,28 +548,24 @@ function init(){
   document.getElementById('tab4').innerHTML = buildTab4();
   document.getElementById('tab5').innerHTML = buildTab5();
 
-  addTableRow(); // 5-3 表格預設一列
   renderShiftTabs();
+  loadSlotIntoForm(getCurrentSlot()); // 一開始載入第一床、白班那一格（此時是空白草稿）
   renderPatientList();
   renderPatientBar();
-  renderHistory();
+  renderSlotStatus();
   updateStatusRight();
-  setNow();
+  if(!getCurrentSlot().time) setNow(); // 空白草稿時，方便帶入現在時間
   updateDependencies();
 
-  // 分頁切換
+  // 分頁切換（身體清潔／排泄照護…五大分類，跟班別切換是不同的東西）
   document.querySelectorAll('#tabs button').forEach(btn=>{
     btn.addEventListener('click', ()=>switchTab(btn.dataset.tab));
   });
 
-  // 班別切換：白班／小夜／大夜，共用同 30 床，各自累積自己的已存紀錄
+  // 班別切換：白班／小夜／大夜，共用同 30 床，各自有自己獨立的一格資料
   document.querySelectorAll('#shiftTabs button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      currentShift = btn.dataset.shift;
-      renderShiftTabs();
-      renderPatientList();
-      renderPatientBar();
-      renderHistory();
+      selectSlot(currentPatientIndex, btn.dataset.shift);
     });
   });
 
@@ -690,12 +686,6 @@ function recalcTotals(){
     document.getElementById(`total_${c}`).textContent = sum;
   });
 }
-function resetOutputTable(){
-  document.getElementById('outputTableBody').innerHTML = '';
-  outputRowSeq = 0;
-  addTableRow();
-  recalcTotals();
-}
 
 // 綁定新增列／刪除列按鈕（buildTab5 用 innerHTML 產生，需在 init 之後綁定，
 // 用事件委派最簡單）
@@ -704,11 +694,21 @@ document.addEventListener('click', (e)=>{
   if(e.target.classList.contains('delrow-btn')){ deleteTableRow(e.target.closest('tr')); }
 });
 
-/* ---------- 班別 ---------- */
-// 30 床 x 3 班別 = 90 筆可儲存的資料格，班別只影響「存到哪一格 / 看哪一格的歷史紀錄」，
-// 病人（床位）清單本身三個班別完全共用同一份 30 筆病人基本資料。
+/* ---------- 班別與資料格 ----------
+   核心規則（避免資料跳位）：
+   每一格資料一律用「班別 + 床號」當索引鍵，
+   30 床 x 3 班別 = 90 格，每一格各自保存自己的欄位內容(fields)、
+   日期時間、是否已存檔；畫面上只有一份表單，但「切換病人」或
+   「切換班別」的當下，一定先把畫面現有內容存回原本那一格的草稿，
+   再把新選到那一格的資料整批載入畫面 —— 這樣同一組欄位名稱
+   (例如 c5_53_tbl_0_pee) 才不會因為換了床、換了班別而被誤植到
+   別人身上。 */
 const SHIFTS = ['白班','小夜','大夜'];
 let currentShift = '白班';
+
+function getCurrentSlot(){
+  return patients[currentPatientIndex].slots[currentShift];
+}
 
 function renderShiftTabs(){
   document.querySelectorAll('#shiftTabs button').forEach(b=>{
@@ -716,23 +716,32 @@ function renderShiftTabs(){
   });
 }
 
+// 切換到「某一床＋某一班別」：先把目前畫面存回原本那一格，再載入新的一格
+function selectSlot(newPatientIndex, newShift){
+  captureFormIntoSlot(getCurrentSlot());
+  currentPatientIndex = newPatientIndex;
+  currentShift = newShift;
+  loadSlotIntoForm(getCurrentSlot());
+  renderShiftTabs();
+  renderPatientList();
+  renderPatientBar();
+  renderSlotStatus();
+}
+
 /* ---------- 病人清單 / 病人資訊列 ---------- */
 function renderPatientList(){
   const box = document.getElementById('plist');
   box.innerHTML = patients.map((p,i)=>{
-    const count = (p.records[currentShift]||[]).length;
+    const saved = p.slots[currentShift].saved;
     return `
     <div class="pitem ${i===currentPatientIndex?'active':''}" data-idx="${i}">
       <div>${p.info.床號||''} ${p.info.姓名} <span class="no">${p.info.性別}</span></div>
-      <div class="no">${p.info.病歷號}｜${p.info.卡號}${count?`｜本班已存 ${count} 筆`:''}</div>
+      <div class="no">${p.info.病歷號}｜${p.info.卡號}${saved?`｜✔ 本班已存檔`:''}</div>
     </div>`;
   }).join('');
   box.querySelectorAll('.pitem').forEach(el=>{
     el.addEventListener('click', ()=>{
-      currentPatientIndex = Number(el.dataset.idx);
-      renderPatientList();
-      renderPatientBar();
-      renderHistory();
+      selectSlot(Number(el.dataset.idx), currentShift);
       closeSidebarOnMobile();
     });
   });
@@ -759,26 +768,31 @@ function renderPatientBar(){
   `;
 }
 
-function renderHistory(){
-  const p = patients[currentPatientIndex];
-  const list = p.records[currentShift] || [];
+// 顯示「目前這一格（班別＋床號）」的存檔狀態，取代原本要點選才能載入的歷史清單
+function renderSlotStatus(){
+  const p = patients[currentPatientIndex].info;
+  const slot = getCurrentSlot();
+  document.getElementById('hheadLabel').textContent = `本格存檔狀態（${currentShift}．${p.床號||''} ${p.姓名}）`;
   const box = document.getElementById('history');
-  document.getElementById('hheadLabel').textContent = `此病人「${currentShift}」已存照護紀錄`;
-  if(list.length===0){ box.innerHTML = '<div class="hitem" style="color:#999;">尚無紀錄</div>'; return; }
-  box.innerHTML = list.map((r,i)=>`<div class="hitem" data-idx="${i}">${r.date} ${r.time}</div>`).join('');
-  box.querySelectorAll('.hitem').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      if(el.dataset.idx===undefined) return;
-      loadRecord(list[Number(el.dataset.idx)]);
-    });
+  if(slot.saved){
+    box.innerHTML = `<div class="hitem" style="color:#2b5d2b;">✔ 已存檔（${slot.date||''} ${slot.time||''}）</div>
+      <div class="hitem" id="btnClearSlot" style="color:#e05a5a;">🗑 清空這一格重填</div>`;
+  } else {
+    box.innerHTML = `<div class="hitem" style="color:#999;">尚未存檔（草稿中，切換病人/班別時會自動保留）</div>
+      <div class="hitem" id="btnClearSlot" style="color:#e05a5a;">🗑 清空這一格重填</div>`;
+  }
+  const clearBtn = document.getElementById('btnClearSlot');
+  if(clearBtn) clearBtn.addEventListener('click', ()=>{
+    if(!confirm(`確定要清空「${currentShift}．${p.床號} ${p.姓名}」這一格的內容嗎？`)) return;
+    resetForm();
   });
 }
 
-/* ---------- 儲存進度統計（30 床 x 3 班別 = 90 筆） ---------- */
+/* ---------- 儲存進度統計（30 床 x 3 班別 = 90 格） ---------- */
 function updateStatusRight(){
   let count = 0;
-  patients.forEach(p=>{ SHIFTS.forEach(s=>{ count += (p.records[s]||[]).length; }); });
-  document.getElementById('statusRight').textContent = `已儲存紀錄：${count} 筆（30 床 × 3 班別 = 90 格）`;
+  patients.forEach(p=>{ SHIFTS.forEach(s=>{ if(p.slots[s].saved) count++; }); });
+  document.getElementById('statusRight').textContent = `已存檔：${count} / 90 格（30 床 × 3 班別）`;
 }
 
 /* ---------- 表單 <-> 資料 ---------- */
@@ -803,34 +817,22 @@ function setFieldValue(el, val){
   }
 }
 
-function resetForm(){
-  form.reset();
-  resetOutputTable();
-  updateDependencies();
-  setNow();
+// 把「目前這一格（班別＋床號）」的畫面內容，整批寫回它自己的草稿物件
+function captureFormIntoSlot(slot){
+  slot.fields = serializeForm();
+  slot.date = document.getElementById('recDate').value;
+  slot.time = document.getElementById('recTime').value;
 }
 
-function saveRecord(){
-  const rec = {
-    date: document.getElementById('recDate').value,
-    time: document.getElementById('recTime').value,
-    fields: serializeForm()
-  };
-  patients[currentPatientIndex].records[currentShift].push(rec);
-  renderPatientList();
-  renderHistory();
-  updateStatusRight();
-  document.getElementById('statusLeft').textContent = `已儲存 ${patients[currentPatientIndex].info.姓名}（${currentShift}）的照護紀錄（${rec.date} ${rec.time}）`;
-}
-
-function loadRecord(rec){
+// 把某一格的資料，整批載入畫面（含 5-3 動態表格要先重建成一樣的列數/編號）
+function loadSlotIntoForm(slot){
   form.reset();
   document.getElementById('outputTableBody').innerHTML = '';
   outputRowSeq = 0;
   // 依已存欄位判斷 5-3 表格原本有哪幾列（可能因為使用者刪過列而不連續），
   // 用 addTableRowWithIndex 依原本的 idx 重建，欄位名稱才能對得回去
   const tblIdxs = new Set();
-  Object.keys(rec.fields).forEach(k=>{
+  Object.keys(slot.fields).forEach(k=>{
     const m = k.match(/^c5_53_tbl_(\d+)_/);
     if(m) tblIdxs.add(Number(m[1]));
   });
@@ -840,15 +842,39 @@ function loadRecord(rec){
     Array.from(tblIdxs).sort((a,b)=>a-b).forEach(idx=>addTableRowWithIndex(idx));
   }
 
-  Object.entries(rec.fields).forEach(([name,val])=>{
+  Object.entries(slot.fields).forEach(([name,val])=>{
     setFieldValue(form.elements[name], val);
   });
-  document.getElementById('recDate').value = rec.date;
-  document.getElementById('recTime').value = rec.time;
+  document.getElementById('recDate').value = slot.date || '';
+  document.getElementById('recTime').value = slot.time || '';
   updateDependencies();
   recalcTotals();
-  switchTab(1);
-  document.getElementById('statusLeft').textContent = `已載入 ${rec.date} ${rec.time} 的照護紀錄`;
+}
+
+function resetForm(){
+  const slot = getCurrentSlot();
+  slot.fields = {};
+  slot.date = '';
+  slot.time = '';
+  slot.saved = false;
+  slot.savedAt = '';
+  loadSlotIntoForm(slot);
+  setNow();
+  renderPatientList();
+  renderSlotStatus();
+  updateStatusRight();
+}
+
+function saveRecord(){
+  const slot = getCurrentSlot();
+  captureFormIntoSlot(slot);
+  slot.saved = true;
+  slot.savedAt = new Date().toLocaleString('zh-TW',{hour12:false});
+  renderPatientList();
+  renderSlotStatus();
+  updateStatusRight();
+  const p = patients[currentPatientIndex].info;
+  document.getElementById('statusLeft').textContent = `已存檔：${currentShift}．${p.床號} ${p.姓名}（${slot.date} ${slot.time}）`;
 }
 
 /* ---------- XML 匯出 / 匯入 ---------- */
@@ -856,25 +882,29 @@ function buildXmlDoc(){
   const doc = document.implementation.createDocument('', 'A13照護資料', null);
   const root = doc.documentElement;
   patients.forEach(p=>{
-    const pEl = doc.createElement('病人');
-    Object.entries(p.info).forEach(([k,v])=> pEl.setAttribute(k, v==null?'':String(v)));
-    // 每位病人的紀錄依「班別」分開儲存：白班／小夜／大夜，共 30 床 x 3 班別 = 90 筆資料格
+    // 每一床、每一班別都各輸出一筆 <紀錄>，固定就是 30 床 x 3 班別 = 90 筆，
+    // 且每一筆都直接把「班別、床號、姓名、性別」寫在自己身上當索引鍵，
+    // 不管之後這份 XML 被匯入、被排序、被丟進 Excel/試算表，都能靠這幾欄還原對應關係，不會跳位。
     SHIFTS.forEach(shift=>{
-      (p.records[shift]||[]).forEach(rec=>{
-        const rEl = doc.createElement('紀錄');
-        rEl.setAttribute('班別', shift);
-        rEl.setAttribute('日期', rec.date||'');
-        rEl.setAttribute('時間', rec.time||'');
-        Object.entries(rec.fields).forEach(([k,v])=>{
-          const fEl = doc.createElement('欄位');
-          fEl.setAttribute('名稱', k);
-          fEl.textContent = v==null?'':String(v);
-          rEl.appendChild(fEl);
-        });
-        pEl.appendChild(rEl);
+      const slot = p.slots[shift];
+      const rEl = doc.createElement('紀錄');
+      rEl.setAttribute('班別', shift);
+      rEl.setAttribute('床號', p.info.床號||'');
+      rEl.setAttribute('姓名', p.info.姓名||'');
+      rEl.setAttribute('性別', p.info.性別||'');
+      rEl.setAttribute('病歷號', p.info.病歷號||'');
+      rEl.setAttribute('卡號', p.info.卡號||'');
+      rEl.setAttribute('日期', slot.date||'');
+      rEl.setAttribute('時間', slot.time||'');
+      rEl.setAttribute('已存檔', slot.saved ? 'true':'false');
+      Object.entries(slot.fields).forEach(([k,v])=>{
+        const fEl = doc.createElement('欄位');
+        fEl.setAttribute('名稱', k);
+        fEl.textContent = v==null?'':String(v);
+        rEl.appendChild(fEl);
       });
+      root.appendChild(rEl);
     });
-    root.appendChild(pEl);
   });
   return doc;
 }
@@ -923,33 +953,35 @@ function importXml(text){
   const doc = parser.parseFromString(text, 'application/xml');
   if(doc.querySelector('parsererror')){ alert('匯入失敗：XML 格式錯誤。'); return; }
 
-  doc.querySelectorAll('病人').forEach(pEl=>{
-    const info = {};
-    Array.from(pEl.attributes).forEach(a=> info[a.name]=a.value);
-    let patient = patients.find(p=>p.info.病歷號 === info.病歷號);
-    if(!patient){
-      patient = { info, records:{白班:[],小夜:[],大夜:[]} };
-      patients.push(patient);
-    } else {
-      patient.info = info;
-    }
-    patient.records = { 白班:[], 小夜:[], 大夜:[] };
-    pEl.querySelectorAll('紀錄').forEach(rEl=>{
-      const fields = {};
-      rEl.querySelectorAll('欄位').forEach(fEl=>{
-        fields[fEl.getAttribute('名稱')] = fEl.textContent;
-      });
-      // 舊版檔案（匯出時還沒有班別分類）一律視為白班，維持可以匯入
-      const shift = rEl.getAttribute('班別') || '白班';
-      if(!patient.records[shift]) patient.records[shift] = [];
-      patient.records[shift].push({ date: rEl.getAttribute('日期'), time: rEl.getAttribute('時間'), fields });
+  // 扁平化格式：每一筆 <紀錄> 自己就帶著 班別／床號／姓名／性別 當索引鍵，
+  // 用「床號」比對回對應的那一床（找不到床號就退而用病歷號比對），
+  // 直接寫回該床、該班別自己的那一格，不會有跳位問題。
+  doc.querySelectorAll('紀錄').forEach(rEl=>{
+    const bedNo = rEl.getAttribute('床號');
+    const chartNo = rEl.getAttribute('病歷號');
+    const shift = rEl.getAttribute('班別') || '白班';
+    let patient = patients.find(p=>p.info.床號 === bedNo);
+    if(!patient && chartNo) patient = patients.find(p=>p.info.病歷號 === chartNo);
+    if(!patient) return; // 目前 30 床清單裡找不到對應床位，略過這筆，不憑空捏造病人
+
+    const fields = {};
+    rEl.querySelectorAll('欄位').forEach(fEl=>{
+      fields[fEl.getAttribute('名稱')] = fEl.textContent;
     });
+    patient.slots[shift] = {
+      fields,
+      date: rEl.getAttribute('日期') || '',
+      time: rEl.getAttribute('時間') || '',
+      saved: rEl.getAttribute('已存檔') === 'true',
+      savedAt: ''
+    };
   });
 
-  currentPatientIndex = 0;
+  loadSlotIntoForm(getCurrentSlot());
+  renderShiftTabs();
   renderPatientList();
   renderPatientBar();
-  renderHistory();
+  renderSlotStatus();
   updateStatusRight();
   alert('匯入完成！');
 }
