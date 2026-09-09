@@ -197,7 +197,7 @@
   .addrow-btn{ margin-top:6px; padding:6px 14px; cursor:pointer; }
 
   /* 5-5 餵食紀錄表：時間欄位獨立配色，小計是跨列合併、整張表加總的黃色大格 */
-  table.feedtable input[type=time]{ width:150px; }
+  table.feedtable input.feed-time{ width:150px; }
   table.feedtable tr.total td{ background:#ffdca0; } /* 橘色合計列，貼近原表格配色 */
   table.feedtable .feed-grandtotal{
     background:#fff44f; font-weight:bold; font-size:1.3em; vertical-align:middle;
@@ -251,10 +251,10 @@
     .chk{ min-height:34px; display:inline-flex; align-items:center; margin-right:12px; }
     .chk input, input[type=checkbox], input[type=radio]{ transform:scale(1.25); margin-right:6px; }
     .toggle-btn span{ padding:6px 12px; font-size:20px; }
-    input[type=time].f-time{ min-width:120px; padding:6px; }
+    input.f-time{ min-width:120px; padding:6px; }
     input[type=number].f-num{ padding:6px; }
     table.iotable input{ width:72px; }
-    table.feedtable input[type=time]{ width:140px; }
+    table.feedtable input.feed-time{ width:140px; }
     .delrow-btn, .feed-delrow-btn{ width:32px; height:32px; font-size:22px; }
 
     .statusbar{ font-size:16px; flex-wrap:wrap; gap:2px 8px; }
@@ -339,7 +339,7 @@
         <span>照顧紀錄日期</span>
         <input type="date" id="recDate">
         <span>時間</span>
-        <input type="time" id="recTime">
+        <input type="text" id="recTime" class="f-time" placeholder="HH:MM" inputmode="numeric" maxlength="5">
         <button id="btnNow" style="margin-left:6px;">帶入現在時間</button>
       </div>
 
@@ -452,8 +452,12 @@ function radioGroup(name, labels, values, depends){
   }).join('');
 }
 
+// 注意：這裡刻意不用瀏覽器原生的 <input type="time">。
+// 原生時間欄位要顯示 12 小時制(上午/下午)還是 24 小時制，是看瀏覽器/作業系統的地區設定，
+// 網頁的 lang 屬性影響不了它——這也是為什麼即使設定 lang="zh-TW" 還是可能跳出「上午 01:19」。
+// 改用純文字欄位＋自己寫的簡單格式化（見 setupTimeFieldFormatting），才能保證一定是 24 小時制 HH:MM。
 function timeInput(name, depends){
-  return `<input type="time" class="f-time" name="${name}"${depends?` data-depends="${depends}"`:''}>`;
+  return `<input type="text" class="f-time" name="${name}" placeholder="HH:MM" inputmode="numeric" maxlength="5"${depends?` data-depends="${depends}"`:''}>`;
 }
 function numInput(name, unit, depends, width){
   return `<input type="number" class="f-num" style="width:${width||100}px" name="${name}"${depends?` data-depends="${depends}"`:''}>`+
@@ -911,7 +915,7 @@ function createFeedRow(idx){
     <td><input type="number" class="feed-medwater" name="c5_55_tbl_${idx}_medwater"></td>
     <td><input type="number" class="feed-water2" name="c5_55_tbl_${idx}_water2"></td>
     <td><input type="number" class="feed-other" name="c5_55_tbl_${idx}_other"></td>
-    <td><input type="time" class="feed-time" name="c5_55_tbl_${idx}_time"></td>
+    <td><input type="text" class="feed-time f-time" name="c5_55_tbl_${idx}_time" placeholder="HH:MM" inputmode="numeric" maxlength="5"></td>
     <td><button type="button" class="feed-delrow-btn" title="刪除此列">✕</button></td>`;
   return tr;
 }
@@ -1143,6 +1147,42 @@ function setFieldValue(el, val){
     el.value = val;
   }
 }
+
+/* ---------- 時間欄位（.f-time）自己做 24 小時制格式化 ----------
+   邊打邊把輸入內容整理成 HH:MM：
+   - 使用者還沒打冒號、純數字連續輸入時（例如快速打「0612」），超過 2 位就自動補冒號 → 06:12
+   - 使用者自己打了冒號（例如打「6」再打「:」再打「12」)，就照原樣處理，不會被重新硬塞冒號
+   離開欄位（focusout）時，如果格式已經是「數字:數字」，就補零、並把小時/分鐘限制在合法範圍內，
+   例如打 6:5 會被整理成 06:05，打 25:99 會被夾住變成 23:59。 */
+function formatTimeInputLive(el){
+  let v = el.value;
+  if(v.includes(':')){
+    v = v.replace(/[^\d:]/g,'');
+    const idx = v.indexOf(':');
+    const hh = v.slice(0, idx).slice(0,2);
+    const mm = v.slice(idx+1).replace(/:/g,'').slice(0,2);
+    v = hh + ':' + mm;
+  } else {
+    v = v.replace(/\D/g,'').slice(0,4);
+    if(v.length > 2) v = v.slice(0,2) + ':' + v.slice(2);
+  }
+  el.value = v;
+}
+function normalizeTimeInputOnBlur(el){
+  const v = el.value.trim();
+  if(v === '') return;
+  const m = v.match(/^(\d{1,2}):(\d{1,2})$/);
+  if(!m) return; // 格式還不完整（例如只打了「6:」）就先不動它，避免使用者打到一半被清掉
+  const hh = Math.min(23, parseInt(m[1],10) || 0);
+  const mm = Math.min(59, parseInt(m[2],10) || 0);
+  el.value = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+}
+document.addEventListener('input', (e)=>{
+  if(e.target.classList && e.target.classList.contains('f-time')) formatTimeInputLive(e.target);
+});
+document.addEventListener('focusout', (e)=>{
+  if(e.target.classList && e.target.classList.contains('f-time')) normalizeTimeInputOnBlur(e.target);
+});
 
 // 把「目前這一格（班別＋床號）」的畫面內容，整批寫回它自己的草稿物件
 function captureFormIntoSlot(slot){
