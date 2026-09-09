@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,13 +28,13 @@
     display:flex; align-items:center; justify-content:center; z-index:200; padding:16px;
   }
   .login-box{
-    background:#fff; padding:32px 28px; border-radius:10px; width:340px; max-width:100%;
+    background:#fff; padding:32px 28px; border-radius:10px; width:420px; max-width:100%;
     box-shadow:0 10px 30px rgba(0,0,0,.3); display:flex; flex-direction:column; gap:12px;
   }
   .login-box h2{ margin:0 0 2px; color:#2f6f8f; text-align:center; }
   .login-sub{ margin:0 0 8px; color:#777; text-align:center; font-size:18px; }
   .login-box input{
-    padding:10px 12px; border:1px solid #bbb; border-radius:5px; font-size:20px;
+    padding:12px 14px; border:1px solid #bbb; border-radius:5px; font-size:40px;
   }
   .login-box button{
     padding:10px; border:none; border-radius:5px; background:var(--blue); color:#fff;
@@ -83,7 +83,7 @@
 
   /* 左側：病人清單 */
   .sidebar{
-    width:290px; min-width:240px; background:#fff; border-right:1px solid #ccc;
+    width:320px; min-width:260px; background:#fff; border-right:1px solid #ccc;
     display:flex; flex-direction:column;
   }
   .shifttabs{ display:flex; gap:4px; padding:6px; background:#2f6f8f; }
@@ -99,12 +99,12 @@
   .shead-title{ white-space:nowrap; }
   .bed-nav{ display:flex; align-items:center; gap:4px; }
   .bed-nav .nav-btn{
-    padding:4px 9px; font-size:14px; cursor:pointer; border:1px solid #999;
+    padding:6px 12px; font-size:18px; cursor:pointer; border:1px solid #999;
     border-radius:4px; background:#fff; flex:0 0 auto;
   }
   .bed-nav .nav-btn:hover{ background:#f0f0f0; }
   .bed-select{
-    flex:1; min-width:0; padding:5px 4px; font-size:15px; border:1px solid #999; border-radius:4px;
+    flex:1; min-width:0; padding:6px 4px; font-size:30px; border:1px solid #999; border-radius:4px;
   }
   .sidebar .plist{ flex:1; overflow-y:auto; }
   .plist .pitem{
@@ -147,7 +147,7 @@
     background:var(--green-bg2); padding:8px 12px; display:flex; gap:10px; align-items:center;
     border:1px solid var(--border); border-top:none;
   }
-  .recorddate input{ padding:4px; }
+  .recorddate input{ padding:6px; font-size:2em; }
 
   .panelwrap{ flex:1; overflow-y:auto; padding:10px 14px; background:var(--green-bg2); border:1px solid var(--border); border-top:none;}
   .tabpanel{ display:none; }
@@ -178,8 +178,8 @@
 
   input[disabled]{ background:#eee; color:#999; }
 
-  input[type=text].f-text, input[type=number].f-num{
-    border:1px solid #aaa; border-radius:3px; padding:5px 7px;
+  input[type=text].f-text, input[type=number].f-num, input.f-time{
+    border:1px solid #aaa; border-radius:3px; padding:6px 9px; font-size:2em;
   }
   .unit{ margin:0 6px 0 2px; color:var(--grey-text); font-size:18px; }
   .pos-pair{ display:inline-flex; align-items:center; gap:2px; margin-right:16px; }
@@ -188,13 +188,20 @@
   table.iotable th, table.iotable td{ border:1px solid #7fc9c9; padding:7px 10px; text-align:center; }
   table.iotable th{ background:#5fd0cd; color:#fff; }
   table.iotable tr.total td{ background:#bfe6bf; font-weight:bold; }
-  table.iotable input{ width:72px; text-align:center; }
-  .delrow-btn{
+  table.iotable input{ width:100px; text-align:center; font-size:2em; }
+  .delrow-btn, .feed-delrow-btn{
     background:#e05a5a; color:#fff; border:none; border-radius:4px;
     width:32px; height:32px; line-height:1; cursor:pointer; font-size:20px;
   }
-  .delrow-btn:hover{ background:#c94848; }
+  .delrow-btn:hover, .feed-delrow-btn:hover{ background:#c94848; }
   .addrow-btn{ margin-top:6px; padding:6px 14px; cursor:pointer; }
+
+  /* 5-5 餵食紀錄表：時間欄位獨立配色，小計是跨列合併、整張表加總的黃色大格 */
+  table.feedtable input[type=time]{ width:150px; }
+  table.feedtable tr.total td{ background:#ffdca0; } /* 橘色合計列，貼近原表格配色 */
+  table.feedtable .feed-grandtotal{
+    background:#fff44f; font-weight:bold; font-size:1.3em; vertical-align:middle;
+  }
 
   .statusbar{
     background:#eee; border-top:1px solid #ccc; padding:4px 12px; font-size:18px; color:#555;
@@ -228,7 +235,8 @@
     .sidebar.open{ transform:translateX(0); }
 
     .bed-nav .nav-btn{ padding:8px 12px; font-size:18px; }
-    .bed-select{ padding:8px 6px; font-size:17px; }
+    .bed-select{ padding:8px 6px; font-size:26px; }
+    .login-box input{ font-size:32px; }
     .toggle-history-btn{ padding:6px 12px; font-size:17px; }
 
     .tabs{ padding:6px 6px 0; }
@@ -243,10 +251,11 @@
     .chk{ min-height:34px; display:inline-flex; align-items:center; margin-right:12px; }
     .chk input, input[type=checkbox], input[type=radio]{ transform:scale(1.25); margin-right:6px; }
     .toggle-btn span{ padding:6px 12px; font-size:20px; }
-    input[type=time].f-time{ min-width:88px; padding:6px; }
+    input[type=time].f-time{ min-width:120px; padding:6px; }
     input[type=number].f-num{ padding:6px; }
-    table.iotable input{ width:48px; }
-    .delrow-btn{ width:32px; height:32px; font-size:22px; }
+    table.iotable input{ width:72px; }
+    table.feedtable input[type=time]{ width:140px; }
+    .delrow-btn, .feed-delrow-btn{ width:32px; height:32px; font-size:22px; }
 
     .statusbar{ font-size:16px; flex-wrap:wrap; gap:2px 8px; }
   }
@@ -447,11 +456,11 @@ function timeInput(name, depends){
   return `<input type="time" class="f-time" name="${name}"${depends?` data-depends="${depends}"`:''}>`;
 }
 function numInput(name, unit, depends, width){
-  return `<input type="number" class="f-num" style="width:${width||60}px" name="${name}"${depends?` data-depends="${depends}"`:''}>`+
+  return `<input type="number" class="f-num" style="width:${width||100}px" name="${name}"${depends?` data-depends="${depends}"`:''}>`+
          (unit?`<span class="unit">${unit}</span>`:'');
 }
 function textInput(name, placeholder, depends, width){
-  return `<input type="text" class="f-text" style="width:${width||140}px" name="${name}" placeholder="${placeholder||''}"${depends?` data-depends="${depends}"`:''}>`;
+  return `<input type="text" class="f-text" style="width:${width||220}px" name="${name}" placeholder="${placeholder||''}"${depends?` data-depends="${depends}"`:''}>`;
 }
 
 /* ---------- 常用組合元件（一個項目常見的樣式） ---------- */
@@ -485,7 +494,7 @@ function checkRow(items){
 // 打勾＋次數＋時間（例如 1-6 換尿布）
 function countTimeRow(id, label, unit, timeLabel){
   const doneName=id+'_done', dep=`${doneName}:true`;
-  return `<div class="row">${cb(doneName,label)} ${numInput(id+'_count',unit,dep,50)} <span class="lbl">，${timeLabel}</span> ${timeInput(id+'_time',dep)}</div>`;
+  return `<div class="row">${cb(doneName,label)} ${numInput(id+'_count',unit,dep,85)} <span class="lbl">，${timeLabel}</span> ${timeInput(id+'_time',dep)}</div>`;
 }
 
 // 打勾＋多個時間欄位（例如 3-1 鼻胃管灌食）
@@ -523,7 +532,7 @@ function positionRows(id, rowsCount, pairsPerRow, tabooId){
       const idx = r*pairsPerRow+p;
       pairs += `<span class="pos-pair">${timeInput(`${id}_r${idx}_time`)} ${radioGroup(`${id}_r${idx}_pos`,['左側','右側','平躺'],['left','right','lying'])}</span>`;
     }
-    const taboo = (r===0) ? `<span class="lbl">禁忌</span>${textInput(tabooId,'',null,180)}` : '';
+    const taboo = (r===0) ? `<span class="lbl">禁忌</span>${textInput(tabooId,'',null,300)}` : '';
     out += `<div class="row">${pairs}${taboo}</div>`;
   }
   return out;
@@ -601,17 +610,17 @@ function buildTab4(){
 
 function buildTab5(){
   const measureRow = `<div class="row">
-      <span class="lbl">輸入量：固體</span>${numInput('c5_53_solid','gm',null,60)}
-      <span class="lbl">；液體</span>${numInput('c5_53_liquid','cc',null,60)}
+      <span class="lbl">輸入量：固體</span>${numInput('c5_53_solid','gm',null,100)}
+      <span class="lbl">；液體</span>${numInput('c5_53_liquid','cc',null,100)}
     </div>
     <div class="row">
-      <span class="lbl">輸出量：排便</span>${numInput('c5_53_stoolcount','次',null,50)}
-      ${numInput('c5_53_stoolweight','gm',null,60)}
+      <span class="lbl">輸出量：排便</span>${numInput('c5_53_stoolcount','次',null,85)}
+      ${numInput('c5_53_stoolweight','gm',null,100)}
     </div>
     <div class="row">
-      <span class="lbl">尿液</span>${numInput('c5_53_urine','cc',null,60)}
-      <span class="lbl">；引流量</span>${numInput('c5_53_drain','cc',null,60)}
-      <span class="lbl">；其他</span>${textInput('c5_53_other','',null,160)}
+      <span class="lbl">尿液</span>${numInput('c5_53_urine','cc',null,100)}
+      <span class="lbl">；引流量</span>${numInput('c5_53_drain','cc',null,100)}
+      <span class="lbl">；其他</span>${textInput('c5_53_other','',null,260)}
     </div>`;
 
   const tableHtml = `<table class="iotable">
@@ -621,6 +630,27 @@ function buildTab5(){
     </table>
     <button type="button" class="addrow-btn" id="btnAddRow">＋ 新增一列紀錄</button>`;
 
+  // 5-5 餵食紀錄表：欄位跟 5-3 的表格很像（都能新增/刪除列），
+  // 差別是最右邊多一欄「小計」——這欄不是每列各自算，而是「整張表所有數字欄位加總」，
+  // 用一個直向合併(rowspan)的儲存格顯示在最上面，跟著資料列數多寡自動調整要合併幾列。
+  const feedTableHtml = `<table class="iotable feedtable">
+      <thead><tr>
+        <th>餵食奶</th><th>餵食水</th><th>餵食高蛋白</th><th>藥+水</th><th>餵水</th><th>其他餵食</th><th>時間</th><th>小計</th><th></th>
+      </tr></thead>
+      <tbody id="feedTableBody">
+        <tr class="total" id="feedTotalRow">
+          <td id="total_feed_milk">0</td>
+          <td id="total_feed_water1">0</td>
+          <td id="total_feed_protein">0</td>
+          <td id="total_feed_medwater">0</td>
+          <td id="total_feed_water2">0</td>
+          <td id="total_feed_other">0</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" class="addrow-btn" id="btnAddFeedRow">＋ 新增一列紀錄</button>`;
+
   return [
     group('5-1','使用冰枕', toggleRow('c5_51','協助病人使用冰枕10分鐘')),
     group('5-2','環境介紹', checkRow([['c5_52','已完成環境介紹，可了解']])),
@@ -629,10 +659,11 @@ function buildTab5(){
     ),
     group('5-4','量身高體重',
       `<div class="row">${cb('c5_54_done','已完成量測：')}
-        <span class="lbl">身高</span>${numInput('c5_54_height','公分',null,60)}
-        <span class="lbl">，體重</span>${numInput('c5_54_weight','公斤',null,60)}
+        <span class="lbl">身高</span>${numInput('c5_54_height','公分',null,100)}
+        <span class="lbl">，體重</span>${numInput('c5_54_weight','公斤',null,100)}
       </div>`
-    )
+    ),
+    group('5-5','餵食紀錄（奶／水／高蛋白／藥水等）', feedTableHtml)
   ].join('');
 }
 
@@ -862,6 +893,94 @@ document.addEventListener('click', (e)=>{
   if(e.target.classList.contains('delrow-btn')){ deleteTableRow(e.target.closest('tr')); }
 });
 
+/* ---------- 5-5 餵食紀錄表（可新增、可刪除列，多一欄跨列合併的「小計」） ----------
+   欄位命名規則跟 5-3 一樣：c5_55_tbl_{idx}_{欄位}，idx 用只會遞增的計數器 feedRowSeq。
+   「小計」不是每一列自己的欄位，而是整張表所有數字欄位加總後的結果，
+   用一個 rowspan 隨列數自動調整的儲存格顯示在第一列，新增/刪除列時重新計算要跨幾列。
+   （刻意不跟 5-3 共用 .delrow-btn 這個 class，避免「刪除列」的事件委派誤觸到別張表。） */
+let feedRowSeq = 0;
+const FEED_COLS = ['milk','water1','protein','medwater','water2','other'];
+
+function createFeedRow(idx){
+  const tr = document.createElement('tr');
+  tr.className = 'feed-row';
+  tr.innerHTML = `
+    <td><input type="number" class="feed-milk" name="c5_55_tbl_${idx}_milk"></td>
+    <td><input type="number" class="feed-water1" name="c5_55_tbl_${idx}_water1"></td>
+    <td><input type="number" class="feed-protein" name="c5_55_tbl_${idx}_protein"></td>
+    <td><input type="number" class="feed-medwater" name="c5_55_tbl_${idx}_medwater"></td>
+    <td><input type="number" class="feed-water2" name="c5_55_tbl_${idx}_water2"></td>
+    <td><input type="number" class="feed-other" name="c5_55_tbl_${idx}_other"></td>
+    <td><input type="time" class="feed-time" name="c5_55_tbl_${idx}_time"></td>
+    <td><button type="button" class="feed-delrow-btn" title="刪除此列">✕</button></td>`;
+  return tr;
+}
+
+function addFeedRow(){
+  const tbody = document.getElementById('feedTableBody');
+  const totalRow = document.getElementById('feedTotalRow');
+  const idx = feedRowSeq++;
+  tbody.insertBefore(createFeedRow(idx), totalRow);
+  updateFeedGrandTotalCell();
+}
+
+function addFeedRowWithIndex(idx){
+  const tbody = document.getElementById('feedTableBody');
+  const totalRow = document.getElementById('feedTotalRow');
+  tbody.insertBefore(createFeedRow(idx), totalRow);
+  if(idx >= feedRowSeq) feedRowSeq = idx + 1;
+  updateFeedGrandTotalCell();
+}
+
+function deleteFeedRow(trEl){
+  const rows = document.querySelectorAll('#feedTableBody tr.feed-row');
+  if(rows.length <= 1){
+    alert('至少要保留一列。');
+    return;
+  }
+  trEl.remove();
+  updateFeedGrandTotalCell();
+  recalcFeedTotals();
+}
+
+// 把「小計」那個合併儲存格，重新放到目前排在第一列的資料列上，
+// rowspan 設成「資料列數 + 1（含合計列）」——每次新增/刪除列都要重算一次。
+function updateFeedGrandTotalCell(){
+  const old = document.getElementById('feedGrandTotalCell');
+  if(old) old.remove();
+  const rows = document.querySelectorAll('#feedTableBody tr.feed-row');
+  if(rows.length === 0) return;
+  const firstRow = rows[0];
+  const td = document.createElement('td');
+  td.id = 'feedGrandTotalCell';
+  td.className = 'feed-grandtotal';
+  td.rowSpan = rows.length + 1; // +1 是最下面那列合計
+  td.innerHTML = `<span id="feedGrandTotal">0</span>`;
+  firstRow.insertBefore(td, firstRow.lastElementChild); // 插在「刪除按鈕」那格之前
+  recalcFeedTotals();
+}
+
+function recalcFeedTotals(){
+  let grand = 0;
+  FEED_COLS.forEach(c=>{
+    let sum = 0;
+    document.querySelectorAll(`.feed-${c}`).forEach(inp=>{ sum += Number(inp.value)||0; });
+    const cell = document.getElementById(`total_feed_${c}`);
+    if(cell) cell.textContent = sum;
+    grand += sum;
+  });
+  const gt = document.getElementById('feedGrandTotal');
+  if(gt) gt.textContent = grand;
+}
+
+document.addEventListener('input', (e)=>{
+  if(e.target.matches('#feedTableBody input')) recalcFeedTotals();
+});
+document.addEventListener('click', (e)=>{
+  if(e.target.id === 'btnAddFeedRow') addFeedRow();
+  if(e.target.classList.contains('feed-delrow-btn')) deleteFeedRow(e.target.closest('tr'));
+});
+
 /* ---------- 班別與資料格 ----------
    核心規則（避免資料跳位）：
    每一格資料一律用「班別 + 床號」當索引鍵，
@@ -953,8 +1072,10 @@ function renderPatientBar(){
 // 所以只要在畫面建立時做一次即可，之後只需要同步 sel.value（見 renderPatientBar）
 function renderBedSelect(){
   const sel = document.getElementById('bedSelect');
+  // 字級放大後，選單收合時的顯示寬度有限，改成只顯示「床號｜卡號」，
+  // 姓名等其他資訊已經在切換後的病人資訊列看得到，這裡保持簡潔好選
   sel.innerHTML = patients.map((p,i)=>
-    `<option value="${i}">${p.info.床號} ${p.info.姓名}｜${p.info.卡號}</option>`
+    `<option value="${i}">${p.info.床號}｜${p.info.卡號}</option>`
   ).join('');
   sel.value = String(currentPatientIndex);
 }
@@ -1048,6 +1169,21 @@ function loadSlotIntoForm(slot){
     Array.from(tblIdxs).sort((a,b)=>a-b).forEach(idx=>addTableRowWithIndex(idx));
   }
 
+  // 5-5 餵食紀錄表：清空後只留「合計」那一列，一樣依已存欄位重建資料列
+  const feedTbody = document.getElementById('feedTableBody');
+  Array.from(feedTbody.querySelectorAll('tr.feed-row')).forEach(tr=>tr.remove());
+  feedRowSeq = 0;
+  const feedIdxs = new Set();
+  Object.keys(slot.fields).forEach(k=>{
+    const m = k.match(/^c5_55_tbl_(\d+)_/);
+    if(m) feedIdxs.add(Number(m[1]));
+  });
+  if(feedIdxs.size === 0){
+    addFeedRow();
+  } else {
+    Array.from(feedIdxs).sort((a,b)=>a-b).forEach(idx=>addFeedRowWithIndex(idx));
+  }
+
   Object.entries(slot.fields).forEach(([name,val])=>{
     setFieldValue(form.elements[name], val);
   });
@@ -1055,6 +1191,7 @@ function loadSlotIntoForm(slot){
   document.getElementById('recTime').value = slot.time || '';
   updateDependencies();
   recalcTotals();
+  recalcFeedTotals();
 }
 
 async function resetForm(){
