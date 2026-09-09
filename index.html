@@ -92,7 +92,20 @@
     font-size:20px; cursor:pointer;
   }
   .shifttabs button.active{ background:var(--pink); font-weight:bold; }
-  .sidebar .shead{ padding:8px; font-weight:bold; background:#eee; border-bottom:1px solid #ccc;}
+  .sidebar .shead{
+    padding:8px; font-weight:bold; background:#eee; border-bottom:1px solid #ccc;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .shead-title{ white-space:nowrap; }
+  .bed-nav{ display:flex; align-items:center; gap:4px; }
+  .bed-nav .nav-btn{
+    padding:4px 9px; font-size:14px; cursor:pointer; border:1px solid #999;
+    border-radius:4px; background:#fff; flex:0 0 auto;
+  }
+  .bed-nav .nav-btn:hover{ background:#f0f0f0; }
+  .bed-select{
+    flex:1; min-width:0; padding:5px 4px; font-size:15px; border:1px solid #999; border-radius:4px;
+  }
   .sidebar .plist{ flex:1; overflow-y:auto; }
   .plist .pitem{
     padding:8px 10px; border-bottom:1px solid #eee; cursor:pointer;
@@ -105,7 +118,17 @@
   .cardno{ font-size:2em; font-weight:bold; color:#e02020; }
   .plist .pitem.active .no{ color:#eaffea; }
 
-  .sidebar .hhead{ padding:8px; font-weight:bold; background:#eee; border-top:1px solid #ccc; border-bottom:1px solid #ccc;}
+  .sidebar .hhead{
+    padding:8px; font-weight:bold; background:#eee; border-top:1px solid #ccc; border-bottom:1px solid #ccc;
+    display:flex; justify-content:space-between; align-items:center; gap:6px;
+  }
+  .toggle-history-btn{
+    background:none; border:1px solid #999; border-radius:4px; cursor:pointer;
+    font-size:14px; padding:2px 8px; flex:0 0 auto;
+  }
+  .toggle-history-btn:hover{ background:#f0f0f0; }
+  /* 收合「本格存檔狀態」後隱藏內容，讓上面的病床清單（.plist 是 flex:1）自動多分到這塊空間 */
+  .sidebar .history.collapsed{ display:none; }
   .sidebar .history{ max-height:220px; overflow-y:auto; }
   .history .hitem{ padding:6px 10px; font-size:18px; border-bottom:1px dashed #ddd; cursor:pointer; }
   .history .hitem:hover{ background:#f5faf3; }
@@ -204,6 +227,10 @@
     }
     .sidebar.open{ transform:translateX(0); }
 
+    .bed-nav .nav-btn{ padding:8px 12px; font-size:18px; }
+    .bed-select{ padding:8px 6px; font-size:17px; }
+    .toggle-history-btn{ padding:6px 12px; font-size:17px; }
+
     .tabs{ padding:6px 6px 0; }
     .tabs button{ font-size:18px; padding:10px 4px; }
 
@@ -273,9 +300,19 @@
         <button data-shift="小夜">小夜</button>
         <button data-shift="大夜">大夜</button>
       </div>
-      <div class="shead">病人清單（31 床）</div>
+      <div class="shead">
+        <span class="shead-title">病人清單（31 床）</span>
+        <div class="bed-nav">
+          <button type="button" id="btnPrevBed" class="nav-btn" title="上一床">▲</button>
+          <select id="bedSelect" class="bed-select" title="直接跳到指定床號"></select>
+          <button type="button" id="btnNextBed" class="nav-btn" title="下一床">▼</button>
+        </div>
+      </div>
       <div class="plist" id="plist"></div>
-      <div class="hhead" id="hheadLabel">此病人已存照護紀錄</div>
+      <div class="hhead" id="hheadRow">
+        <span id="hheadLabel">此病人已存照護紀錄</span>
+        <button type="button" id="btnToggleHistory" class="toggle-history-btn" title="顯示/隱藏">▾</button>
+      </div>
       <div class="history" id="history"></div>
     </div>
 
@@ -649,6 +686,7 @@ function buildStaticUI(){
   document.getElementById('tab5').innerHTML = buildTab5();
 
   renderShiftTabs();
+  renderBedSelect(); // 病床下拉選單的選項清單（只需要建立一次）
   loadSlotIntoForm(getCurrentSlot()); // 先用本地空白草稿把表單骨架建起來（含 5-3 表格預設一列）
   renderPatientList();
   renderPatientBar();
@@ -666,6 +704,20 @@ function buildStaticUI(){
     btn.addEventListener('click', ()=>{
       selectSlot(currentPatientIndex, btn.dataset.shift);
     });
+  });
+
+  // 病床導覽：▲上一床／▼下一床／下拉直接選床號，跟點清單裡的病床是同一套切換邏輯
+  document.getElementById('btnPrevBed').addEventListener('click', goPrevBed);
+  document.getElementById('btnNextBed').addEventListener('click', goNextBed);
+  document.getElementById('bedSelect').addEventListener('change', (e)=>{
+    selectSlot(Number(e.target.value), currentShift);
+  });
+
+  // 「本格存檔狀態」顯示/隱藏：收合起來可以讓上面病床清單多一點顯示空間
+  document.getElementById('btnToggleHistory').addEventListener('click', ()=>{
+    const box = document.getElementById('history');
+    const collapsed = box.classList.toggle('collapsed');
+    document.getElementById('btnToggleHistory').textContent = collapsed ? '▸' : '▾';
   });
 
   // 表單裡有很多文字/數字/時間欄位，只要按下 Enter（或手機鍵盤按「完成／Go」），
@@ -893,6 +945,28 @@ function renderPatientBar(){
     <span>血型：<b>${p.血型}</b></span>
     <span>診斷：<b>${p.診斷}</b></span>
   `;
+  const sel = document.getElementById('bedSelect');
+  if(sel) sel.value = String(currentPatientIndex);
+}
+
+// 下拉選單的選項只跟「31 床清單本身」有關，跟目前選到哪一床、哪個班別無關，
+// 所以只要在畫面建立時做一次即可，之後只需要同步 sel.value（見 renderPatientBar）
+function renderBedSelect(){
+  const sel = document.getElementById('bedSelect');
+  sel.innerHTML = patients.map((p,i)=>
+    `<option value="${i}">${p.info.床號} ${p.info.姓名}｜${p.info.卡號}</option>`
+  ).join('');
+  sel.value = String(currentPatientIndex);
+}
+
+// 上一床／下一床：用目前排序（跟畫面清單順序一致）前後移動一格，頭尾相接
+function goPrevBed(){
+  const idx = (currentPatientIndex - 1 + patients.length) % patients.length;
+  selectSlot(idx, currentShift);
+}
+function goNextBed(){
+  const idx = (currentPatientIndex + 1) % patients.length;
+  selectSlot(idx, currentShift);
 }
 
 // 顯示「目前這一格（班別＋床號）」的存檔狀態，取代原本要點選才能載入的歷史清單
