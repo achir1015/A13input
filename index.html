@@ -48,7 +48,17 @@
     background:#2f6f8f; color:#fff; padding:6px 12px;
     display:flex; justify-content:space-between; align-items:center; font-size:20px; gap:8px;
   }
-  .titlebar .ver{opacity:.8;}
+  /* 標題文字＋登入信箱這兩個欄位，一定要限制成單行＋超出省略號（...），
+     不然遇到像 email 這種沒有空格、不能斷行的長字串時，
+     某些手機瀏覽器（如 Android Chrome）的 flexbox 演算法會把旁邊可斷行的中文標題
+     硬擠成一個字一行的窄直條，整個標題列會被撐得非常高，
+     連帶把下面병人清單/分頁內容全部往下擠到看不見。iPhone Safari 剛好沒踩到這個問題，
+     不代表沒有 bug，只是版面剛好還夠寬。 */
+  .titlebar > div{
+    min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .titlebar > div:first-of-type{ flex:1 1 auto; }
+  .titlebar .ver{ opacity:.8; flex:0 1 auto; max-width:45%; }
   .menu-btn{
     display:none; /* 桌機不需要漢堡選單，手機版才會透過 media query 顯示 */
     background:none; border:1px solid rgba(255,255,255,.6); color:#fff;
@@ -79,7 +89,7 @@
   }
   .patientbar b{ color:#000; }
 
-  .body-wrap{ flex:1; display:flex; overflow:hidden; }
+  .body-wrap{ flex:1; display:flex; overflow:hidden; min-height:0; }
 
   /* 左側：病人清單 */
   .sidebar{
