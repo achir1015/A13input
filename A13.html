@@ -218,6 +218,16 @@
   }
   .delrow-btn:hover, .feed-delrow-btn:hover{ background:#c94848; }
   .addrow-btn{ margin-top:6px; padding:6px 14px; cursor:pointer; }
+  .zero-btn{
+    margin-left:8px; background:#fff3d6; border:1px solid #d9a441; color:#8a5a00;
+  }
+  .zero-btn:hover{ background:#ffe7b3; }
+
+  /* 凍結 5-3 輸出入量表格（尿/引流/屎/尿與屎）的表頭：
+     手機輸入時往下捲動新增列，欄位名稱還是能一直看到，不用一直往上滑確認。
+     跟電子版組別分配表一樣，用 border-collapse:separate 避免 sticky 在部分瀏覽器下的邊框異常。 */
+  table.outputtable{ border-collapse:separate; border-spacing:0; }
+  table.outputtable th{ position:sticky; top:0; z-index:2; }
 
   /* 5-5 餵食紀錄表：時間欄位獨立配色，小計是跨列合併、整張表加總的黃色大格 */
   table.feedtable input.feed-time{ width:150px; }
@@ -696,12 +706,13 @@ function buildTab5(){
       <span class="lbl">；其他</span>${textInput('c5_53_other','',null,260)}
     </div>`;
 
-  const tableHtml = `<table class="iotable">
+  const tableHtml = `<table class="iotable outputtable">
       <thead><tr><th>尿</th><th>引流</th><th>屎</th><th>尿與屎</th><th></th></tr></thead>
       <tbody id="outputTableBody"></tbody>
       <tfoot><tr class="total"><td id="total_pee">0</td><td id="total_drain">0</td><td id="total_stool">0</td><td id="total_mix">0</td><td></td></tr></tfoot>
     </table>
-    <button type="button" class="addrow-btn" id="btnAddRow">＋ 新增一列紀錄</button>`;
+    <button type="button" class="addrow-btn" id="btnAddRow">＋ 新增一列紀錄</button>
+    <button type="button" class="addrow-btn zero-btn" id="btnZeroOutput">⟲ 歸零（本格）</button>`;
 
   // 5-5 餵食紀錄表：欄位跟 5-3 的表格很像（都能新增/刪除列），
   // 差別是最右邊多一欄「小計」——這欄不是每列各自算，而是「整張表所有數字欄位加總」，
@@ -1048,11 +1059,33 @@ function recalcTotals(){
   });
 }
 
-// 綁定新增列／刪除列按鈕（buildTab5 用 innerHTML 產生，需在 init 之後綁定，
+// 「歸零」：把目前這一格（班別＋床號＋姓名＋照顧紀錄日期，也就是現在畫面上看到的這一格）
+// 的尿／引流／屎／尿與屎表格，所有已輸入的數值都設回 0（不刪列，只是把數字清空），
+// 並且立刻同步存回雲端，避免歸零之後忘記按存檔、其他裝置看到的還是舊數字。
+async function zeroOutputTable(){
+  const p = patients[currentPatientIndex].info;
+  const dateStr = document.getElementById('recDate').value || '（未填日期）';
+  const timeStr = document.getElementById('recTime').value || '';
+  const ok = confirm(
+    `確定要將「${currentShift}．${p.床號} ${p.姓名}．${dateStr} ${timeStr}」這一格的\n尿／引流／屎／尿與屎 數值全部歸零嗎？（會同步清空雲端資料）`
+  );
+  if(!ok) return;
+  document.querySelectorAll('#outputTableBody input').forEach(inp=>{ inp.value = 0; });
+  recalcTotals();
+  const slot = getCurrentSlot();
+  captureFormIntoSlot(slot);
+  await saveSlotToCloud(currentPatientIndex, currentShift, slot);
+  renderSlotStatus();
+  updateStatusRight();
+  document.getElementById('statusLeft').textContent = '已將輸出入量表格歸零並同步雲端';
+}
+
+// 綁定新增列／刪除列／歸零按鈕（buildTab5 用 innerHTML 產生，需在 init 之後綁定，
 // 用事件委派最簡單）
 document.addEventListener('click', (e)=>{
   if(e.target.id === 'btnAddRow'){ addTableRow(); recalcTotals(); }
   if(e.target.classList.contains('delrow-btn')){ deleteTableRow(e.target.closest('tr')); }
+  if(e.target.id === 'btnZeroOutput'){ zeroOutputTable(); }
 });
 
 /* ---------- 5-5 餵食紀錄表（可新增、可刪除列，多一欄跨列合併的「小計」） ----------
