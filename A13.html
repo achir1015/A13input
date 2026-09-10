@@ -201,6 +201,10 @@
 
   /* 5-5 餵食紀錄表：時間欄位獨立配色，小計是跨列合併、整張表加總的黃色大格 */
   table.feedtable input.feed-time{ width:150px; }
+
+  /* 4-1 翻身/拍背（舒適與活動分頁）的時間欄位，寬度縮減約一半，
+     只影響 #tab4 這個分頁裡的時間欄位，其他分頁的時間欄位維持原本寬度 */
+  #tab4 input.f-time{ width:150px; }
   table.feedtable tr.total td{ background:#ffdca0; } /* 橘色合計列，貼近原表格配色 */
   table.feedtable .feed-grandtotal{
     background:#fff44f; font-weight:bold; font-size:1.3em; vertical-align:middle;
@@ -618,7 +622,7 @@ function buildTab4(){
 function buildTab5(){
   const measureRow = `<div class="row">
       <span class="lbl">輸入量：固體</span>${numInput('c5_53_solid','gm',null,100)}
-      <span class="lbl">；液體</span>${numInput('c5_53_liquid','cc',null,100)}
+      <span class="lbl">；液體</span>${numInput('c5_53_liquid','cc',null,150)}
     </div>
     <div class="row">
       <span class="lbl">輸出量：排便</span>${numInput('c5_53_stoolcount','次',null,85)}
