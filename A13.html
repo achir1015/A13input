@@ -467,7 +467,7 @@ function timeInput(name, depends){
   return `<input type="text" class="f-time" name="${name}" placeholder="HH:MM" inputmode="numeric" maxlength="5"${depends?` data-depends="${depends}"`:''}>`;
 }
 function numInput(name, unit, depends, width){
-  return `<input type="number" class="f-num" style="width:${width||100}px" name="${name}"${depends?` data-depends="${depends}"`:''}>`+
+  return `<input type="number" class="f-num" inputmode="numeric" style="width:${width||100}px" name="${name}"${depends?` data-depends="${depends}"`:''}>`+
          (unit?`<span class="unit">${unit}</span>`:'');
 }
 function textInput(name, placeholder, depends, width){
@@ -855,10 +855,10 @@ let outputRowSeq = 0;
 function createOutputRow(idx){
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="number" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
-    <td><input type="number" class="tbl-drain" name="c5_53_tbl_${idx}_drain"></td>
-    <td><input type="number" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
-    <td><input type="number" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
+    <td><input type="number" inputmode="numeric" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
+    <td><input type="number" inputmode="numeric" class="tbl-drain" name="c5_53_tbl_${idx}_drain"></td>
+    <td><input type="number" inputmode="numeric" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
+    <td><input type="number" inputmode="numeric" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
     <td><button type="button" class="delrow-btn" title="刪除此列">✕</button></td>`;
   return tr;
 }
@@ -916,12 +916,12 @@ function createFeedRow(idx){
   const tr = document.createElement('tr');
   tr.className = 'feed-row';
   tr.innerHTML = `
-    <td><input type="number" class="feed-milk" name="c5_55_tbl_${idx}_milk"></td>
-    <td><input type="number" class="feed-water1" name="c5_55_tbl_${idx}_water1"></td>
-    <td><input type="number" class="feed-protein" name="c5_55_tbl_${idx}_protein"></td>
-    <td><input type="number" class="feed-medwater" name="c5_55_tbl_${idx}_medwater"></td>
-    <td><input type="number" class="feed-water2" name="c5_55_tbl_${idx}_water2"></td>
-    <td><input type="number" class="feed-other" name="c5_55_tbl_${idx}_other"></td>
+    <td><input type="number" inputmode="numeric" class="feed-milk" name="c5_55_tbl_${idx}_milk"></td>
+    <td><input type="number" inputmode="numeric" class="feed-water1" name="c5_55_tbl_${idx}_water1"></td>
+    <td><input type="number" inputmode="numeric" class="feed-protein" name="c5_55_tbl_${idx}_protein"></td>
+    <td><input type="number" inputmode="numeric" class="feed-medwater" name="c5_55_tbl_${idx}_medwater"></td>
+    <td><input type="number" inputmode="numeric" class="feed-water2" name="c5_55_tbl_${idx}_water2"></td>
+    <td><input type="number" inputmode="numeric" class="feed-other" name="c5_55_tbl_${idx}_other"></td>
     <td><input type="text" class="feed-time f-time" name="c5_55_tbl_${idx}_time" placeholder="HH:MM" inputmode="numeric" maxlength="5"></td>
     <td><button type="button" class="feed-delrow-btn" title="刪除此列">✕</button></td>`;
   return tr;
