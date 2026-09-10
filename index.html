@@ -330,6 +330,7 @@
     <span>時間</span>
     <input type="text" id="recTime" class="f-time" placeholder="HH:MM" inputmode="numeric" maxlength="5">
     <button id="btnNow" style="margin-left:6px;">帶入現在時間</button>
+    <span class="lbl">卡號：</span><span id="recordCardNo" class="cardno"></span>
   </div>
 
   <div class="patientbar-wrap">
@@ -1108,6 +1109,9 @@ function renderPatientBar(){
   `;
   const sel = document.getElementById('bedSelect');
   if(sel) sel.value = String(currentPatientIndex);
+  // 卡號同時也顯示在最上面「照顧紀錄日期」那一列，即使病人資訊列被收合起來也能隨時核對
+  const recCardNo = document.getElementById('recordCardNo');
+  if(recCardNo) recCardNo.textContent = p.卡號;
 }
 
 // 下拉選單的選項只跟「31 床清單本身」有關，跟目前選到哪一床、哪個班別無關，
