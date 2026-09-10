@@ -230,6 +230,26 @@
     background:#fff44f; font-weight:bold; font-size:1.3em; vertical-align:middle;
   }
 
+  /* 電子版｜組別分配表：下拉選單直接對應顏色本身（無色/藍色/紅色/綠色） */
+  table.grouptable{ max-width:none; }
+  table.grouptable th{ white-space:nowrap; }
+  .grouptable-bed{ font-weight:bold; white-space:nowrap; background:#f5f5f5; }
+  select.group-select{
+    font-size:1em; padding:6px 8px; border:1px solid #999; border-radius:4px;
+    background:transparent; color:#333; min-width:110px;
+  }
+  select.group-select.grp-blue{ background:#2255cc; color:#fff; border-color:#2255cc; }
+  select.group-select.grp-red{ background:#cc2222; color:#fff; border-color:#cc2222; }
+  select.group-select.grp-green{ background:#228833; color:#fff; border-color:#228833; }
+  .group-legend{
+    display:inline-block; padding:4px 12px; border-radius:4px; font-weight:bold;
+    margin-right:8px; color:#fff;
+  }
+  .group-legend.grp-blue{ background:#2255cc; }
+  .group-legend.grp-red{ background:#cc2222; }
+  .group-legend.grp-green{ background:#228833; }
+  .group-legend.grp-none{ background:transparent; color:#333; border:1px dashed #999; }
+
   .statusbar{
     background:#eee; border-top:1px solid #ccc; padding:4px 12px; font-size:18px; color:#555;
     display:flex; justify-content:space-between;
@@ -371,6 +391,7 @@
         <button data-tab="3">膳食與給藥</button>
         <button data-tab="4">舒適與活動</button>
         <button data-tab="5">一般技術性</button>
+        <button data-tab="6">電子版</button>
       </div>
 
       <div class="panelwrap">
@@ -381,6 +402,11 @@
           <div class="tabpanel" id="tab4"></div>
           <div class="tabpanel" id="tab5"></div>
         </form>
+        <!-- 「電子版」組別分配表刻意放在 <form id="careForm"> 外面：
+             這份資料是「全部 31 床共用的一張表」，不是跟著目前選到的床＋班別走的，
+             放在 form 外面，存檔/讀檔時的 FormData 掃描才不會誤把這裡的欄位也當成
+             某一床某一班別的照護紀錄存進去。 -->
+        <div class="tabpanel" id="tab6"></div>
       </div>
     </div>
   </div>
@@ -701,6 +727,91 @@ function buildTab5(){
   ].join('');
 }
 
+/* ================= 分頁 6：電子版組別分配 =================
+   跟前面 5 個分頁不一樣：這裡不是「某一床、某一班別」各自的照護紀錄，
+   而是「31 床共用的一張表」——每一床在 4 個分組欄位裡各自標成一種顏色，
+   資料索引鍵是「卡號」，跟目前選到哪一床、哪個班別完全無關，所以另外存成一份獨立的
+   Firestore 文件（見 loadGroupAssignments / saveGroupAssignments），
+   不會混進 patients[].slots 那一套「班別+床號」的資料模型裡。 */
+const GROUP_COLUMNS = ['白班2組','白班3組','小夜2組','大夜2組'];
+// 下拉選單共 4 種：無色(透明)／藍色／紅色／綠色。value 直接用顏色名稱，
+// 這樣存進 Firestore 的資料本身就是「人看得懂的顏色」，不用再去對照 A/B/C 是什麼意思。
+const GROUP_COLORS = { blue:'藍色', red:'紅色', green:'綠色' };
+let groupAssignments = {}; // { 卡號: { 白班2組:'blue', 白班3組:'', ... } }
+
+function groupSelectClass(val){
+  return val==='blue' ? 'grp-blue' : val==='red' ? 'grp-red' : val==='green' ? 'grp-green' : '';
+}
+
+function buildTab6(){
+  const rows = patients.map(p=>{
+    const card = p.info.卡號;
+    const saved = groupAssignments[card] || {};
+    const cells = GROUP_COLUMNS.map(col=>{
+      const val = saved[col] || '';
+      const opts = ['', 'blue', 'red', 'green'].map(v=>{
+        const label = v==='' ? '無色（透明）' : GROUP_COLORS[v];
+        return `<option value="${v}"${v===val?' selected':''}>${label}</option>`;
+      }).join('');
+      return `<td><select class="group-select ${groupSelectClass(val)}" data-card="${card}" data-col="${col}">${opts}</select></td>`;
+    }).join('');
+    return `<tr><td class="grouptable-bed">${p.info.床號||''}<br>${card}</td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="group">
+    <div class="gtitle">電子版｜組別分配（31 床）</div>
+    <div class="row">
+      <span class="lbl">顏色</span>
+      <span class="group-legend grp-blue">藍色</span>
+      <span class="group-legend grp-red">紅色</span>
+      <span class="group-legend grp-green">綠色</span>
+      <span class="group-legend grp-none">無色（透明）</span>
+      <span class="lbl" id="groupStatus" style="margin-left:16px;"></span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="iotable grouptable">
+        <thead><tr><th>床號｜卡號</th>${GROUP_COLUMNS.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+        <tbody id="groupTableBody">${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+/* ---------- 電子版組別分配：讀取／寫入雲端（跟每床的照護紀錄分開存） ---------- */
+async function loadGroupAssignments(){
+  try{
+    const snap = await db.collection('a13groupassignment').doc('main').get();
+    groupAssignments = (snap.exists && snap.data().assignments) ? snap.data().assignments : {};
+  }catch(err){
+    console.error('讀取組別分配失敗，暫時使用空白資料：', err);
+    groupAssignments = groupAssignments || {};
+  }
+}
+async function saveGroupAssignments(){
+  const statusEl = document.getElementById('groupStatus');
+  if(statusEl) statusEl.textContent = '同步中...';
+  try{
+    const updatedBy = auth.currentUser ? auth.currentUser.email : '';
+    const updatedAt = new Date().toLocaleString('zh-TW',{hour12:false});
+    await db.collection('a13groupassignment').doc('main').set({
+      assignments: groupAssignments, updatedBy, updatedAt
+    });
+    if(statusEl) statusEl.textContent = `已同步（${updatedBy} ${updatedAt}）`;
+  }catch(err){
+    console.error('寫入組別分配失敗：', err);
+    if(statusEl) statusEl.textContent = '同步失敗，請檢查網路連線';
+  }
+}
+document.addEventListener('change', (e)=>{
+  if(!e.target.classList.contains('group-select')) return;
+  const card = e.target.dataset.card, col = e.target.dataset.col, val = e.target.value;
+  if(!groupAssignments[card]) groupAssignments[card] = {};
+  groupAssignments[card][col] = val;
+  e.target.className = 'group-select ' + groupSelectClass(val);
+  saveGroupAssignments();
+});
+
+
 /* ================= 病人與紀錄的資料模型 ================= */
 // 為避免顯示到真實病人資料，這裡全部使用示範用的假資料。
 const patients = [
@@ -749,6 +860,7 @@ function buildStaticUI(){
   document.getElementById('tab3').innerHTML = buildTab3();
   document.getElementById('tab4').innerHTML = buildTab4();
   document.getElementById('tab5').innerHTML = buildTab5();
+  document.getElementById('tab6').innerHTML = buildTab6(); // 電子版組別分配，先用空白資料把表格骨架建起來
 
   renderShiftTabs();
   renderBedSelect(); // 病床下拉選單的選項清單（只需要建立一次）
@@ -813,7 +925,9 @@ function buildStaticUI(){
 async function initAfterLogin(){
   document.getElementById('statusLeft').textContent = '正在從雲端載入資料...';
   await loadAllSlotsFromCloud();
+  await loadGroupAssignments();
   loadSlotIntoForm(getCurrentSlot());
+  document.getElementById('tab6').innerHTML = buildTab6(); // 用剛載入的組別分配資料重新畫一次表格
   renderPatientList();
   renderPatientBar();
   renderSlotStatus();
