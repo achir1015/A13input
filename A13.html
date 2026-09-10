@@ -83,10 +83,19 @@
   .toolbar .sep{ width:1px; background:#ccc; align-self:stretch; margin:0 4px;}
 
   /* 病人資訊列 */
+  .patientbar-wrap{
+    display:flex; align-items:flex-start; background:#fff; border-bottom:1px solid #ccc;
+  }
+  .toggle-patientbar-btn{
+    flex:0 0 auto; margin:6px 4px 6px 8px; padding:4px 10px; font-size:16px;
+    border:1px solid #999; border-radius:4px; background:#fff; cursor:pointer;
+  }
+  .toggle-patientbar-btn:hover{ background:#f0f0f0; }
   .patientbar{
-    background:#fff; border-bottom:1px solid #ccc; padding:6px 12px;
+    flex:1; min-width:0; padding:6px 12px 6px 0;
     display:flex; flex-wrap:wrap; gap:14px; font-size:20px; color:#333;
   }
+  .patientbar.collapsed{ display:none; }
   .patientbar b{ color:#000; }
 
   .body-wrap{ flex:1; display:flex; overflow:hidden; min-height:0; }
@@ -241,7 +250,8 @@
     .toolbar button{ padding:8px 10px; font-size:20px; }
     .toolbar .note{ display:none; } /* 手機畫面窄，說明文字先隱藏，避免擠壓按鈕 */
 
-    .patientbar{ font-size:18px; gap:6px 10px; padding:6px 8px; }
+    .patientbar{ font-size:18px; gap:6px 10px; padding:6px 8px 6px 0; }
+    .toggle-patientbar-btn{ padding:6px 12px; font-size:16px; }
 
     .sidebar{
       position:fixed; top:0; left:0; bottom:0; z-index:50;
@@ -322,7 +332,10 @@
     <button id="btnNow" style="margin-left:6px;">帶入現在時間</button>
   </div>
 
-  <div class="patientbar" id="patientbar"><!-- 由 JS 產生 --></div>
+  <div class="patientbar-wrap">
+    <button type="button" id="btnTogglePatientbar" class="toggle-patientbar-btn" title="顯示/隱藏病人資訊">▾</button>
+    <div class="patientbar" id="patientbar"><!-- 由 JS 產生 --></div>
+  </div>
 
   <div class="body-wrap">
 
@@ -771,6 +784,13 @@ function buildStaticUI(){
     const box = document.getElementById('history');
     const collapsed = box.classList.toggle('collapsed');
     document.getElementById('btnToggleHistory').textContent = collapsed ? '▸' : '▾';
+  });
+
+  // 病人資訊列（班別/床號/姓名/診斷…那一長條）顯示/隱藏：收合起來可以縮小這塊區域高度
+  document.getElementById('btnTogglePatientbar').addEventListener('click', ()=>{
+    const bar = document.getElementById('patientbar');
+    const collapsed = bar.classList.toggle('collapsed');
+    document.getElementById('btnTogglePatientbar').textContent = collapsed ? '▸' : '▾';
   });
 
   // 表單裡有很多文字/數字/時間欄位，只要按下 Enter（或手機鍵盤按「完成／Go」），
