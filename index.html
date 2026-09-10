@@ -75,8 +75,8 @@
     display:flex; gap:8px; flex-wrap:wrap; align-items:center;
   }
   .toolbar button{
-    padding:9px 18px; border:1px solid #99b; border-radius:4px; background:#fff;
-    cursor:pointer; font-size:20px;
+    padding:7px 14px; border:1px solid #99b; border-radius:4px; background:#fff;
+    cursor:pointer; font-size:15px;
   }
   .toolbar button.primary{ background:var(--blue); color:#fff; border-color:var(--blue); }
   .toolbar button.danger{ background:#e05a5a; color:#fff; border-color:#e05a5a; }
@@ -247,7 +247,7 @@
     .titlebar > div:not(.menu-btn){ font-size:18px; }
 
     .toolbar{ padding:6px 8px; }
-    .toolbar button{ padding:8px 10px; font-size:20px; }
+    .toolbar button{ padding:6px 8px; font-size:15px; }
     .toolbar .note{ display:none; } /* 手機畫面窄，說明文字先隱藏，避免擠壓按鈕 */
 
     .patientbar{ font-size:18px; gap:6px 10px; padding:6px 8px 6px 0; }
@@ -313,8 +313,6 @@
 
   <div class="toolbar">
     <button class="primary" id="btnSave">💾 存檔(F12)</button>
-    <button id="btnCancel">✖ 取消(F11)</button>
-    <button id="btnCheck">✔ 檢核</button>
     <div class="sep"></div>
     <button id="btnExport">⬇ 匯出 XML</button>
     <button id="btnImport">⬆ 匯入 XML</button>
@@ -801,12 +799,6 @@ function buildStaticUI(){
   form.addEventListener('change', updateDependencies);
 
   document.getElementById('btnSave').addEventListener('click', saveRecord);
-  document.getElementById('btnCancel').addEventListener('click', ()=>{
-    if(confirm('確定要清空目前這一格的內容嗎？（會同步清空雲端資料）')) resetForm();
-  });
-  document.getElementById('btnCheck').addEventListener('click', ()=>{
-    alert('檢核完成，未發現必填欄位缺漏（示範版未設定強制必填規則）。');
-  });
   document.getElementById('btnExport').addEventListener('click', exportXml);
   document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('fileImport').click());
   document.getElementById('fileImport').addEventListener('change', handleImportFile);
