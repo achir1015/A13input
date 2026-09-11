@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>[A13] 病房照護紀錄作業</title>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABy0lEQVR4nGNkwAL08/v/YxOnFFycWMiILoYiQCuL8TmEid6Wo9vFRG/L0R3BREghDFioyzFcmFDA0J/sy8DAwMCgJSvOcGFCAcOFCQUMhkpSDAwMDAyOusoMFyYUMJzqyWWYnhHIwMbCTNBcJmJ972+mxXDk2n0GWy1FBkEeToZrj18yGBdNQlGz//JdBoOCCQwNy3czWKjLM/BxceA1Uz+//z9RIcDDwc7gpKfCMHXbcYbrT14xeJto4lTbGe/F0BbrwXD42n2GD1+/EzSbKAd4GKkxsLOyMCwviWLQlZdg8DfXwqm2fOE2hrgJKxnstBUZjJSkCZrNQowD/M21GebsPsUwZesxBnEBHoYd9SkMboZqDF3xXgwMDAwM8/PCGJpW7GGQFRVgSHQ2Yfjx6w/D4Wv3Ga48ekHQbMaByAHIgGAIzCwqwCuf3jeBIgcQnQ1pBQbcAXij4MKEAoaTj/AbcGFCAVEWGRRMwCqOMwSINZhYgMs8iqLAXI4S3RBAMBdQwxJ8YMAT4agDRh1ANwfgKoiIqo5xaSYEiCnMRk4U4AID3iBhwtZdohe4OLGQccCjgAnmEnpbDLOTCV2AnpYzMKD1jmGAnt1zAIUkgBVgYmUGAAAAAElFTkSuQmCC">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAKr0lEQVR4nO3daWwU5x3H8d9eXhs7vg02+AIbMAs+8JmCCEcdSjlMlLQSIk2qpJXSSm05+iJ507wolapWSTFRXrQvGiVN0yqR2kYBip3WhBCCSAkGc6QxtbnBNmBjDIvBht2+IEYmnlnv7M7szPz9+0goSmZn98nudx+eeXYNDlhA+YatQbPHQNFr27bJYfYYTBkAA54YzAg8Zg/IiCe2WMVt6IMwYlJiZNyG3DFDpnAYEbZT7ztkzBQuI1rR7R3CkCkaes3WuszQjJmipVdDUb0rGDIZIZrZOuIZmjGTUaJpK6KgGTMZLdLGNAfNmClWImlNU9CMmWJNa3NhB82YySxa2gsraMZMZgu3wXGDZsxkFeG0qPtH30RmChk0Z2eymvGaVA2aMZNVhWqTSw4SRTFozs5kdWqNjgmaMZNdKLXqNmMgpI9JXg/qZuWjujgXs6ZmIi8rFckJ8Yj3uDE4PIzBO8Po6b+JM5ev4cS5bnx84hQu9g6YPWxDPfQ1Pcmz8w/qa/DT1QtD3qaptR0v/WlXRPfvcbmQl5WCgqw0FE4e+ZWOwslpSEmMVzwnEAiicvM2TY/jcAB1s/Lx3YVleGzudHhcLk3nH2g/h9d2fIovzvdoOs/KRn/ddMLM0GtqfePeZmlpER5J8OLG4B3N9//iU0vwnQWlkQxNk6LsDPz+x09GfP6js/NRMzMXW95twfufndBxZNYwIXY5ygpzUDg5bdzbeT1urKicHYMRmcvldOLldfWonDHN7KHo7kHQkpcba8OYnUc0aLitnTkdDmx+YpHZw9DF6HbFLzm8Hje+VTkr7NuXFmRj+pR0nO7pM3BU+jjV3YeWox1oO30JHV29uOYfRDAYREZyIioKc/D0kvmYl5+tev68/GzkpCejq0/OhaL4oJeVFSMp3qvpnLW1PjRu36fpnKG793C6pw9nL1/Dma9+nb1y/5//fPl5JMR5NN2fmkAwiJajHfjjvw6qXth19Q2gq28AzUdO4jfPrsTjFTNV768gK1Ve0BN1uXFn+C68nrHv6dU1c/Dazk8RCIT/tPz273siGZ5mp7r78PM3doR120AgiMbtn4QMOnmS8g6M3ZRv2Bps27bJIfqicEpqEmpn5Skea794BR8ePql4LDM5EQtmFxg5tJi51DeAQFD9jXndfzuGozGe6KDX1PjgdCj/RHxTazuaVIIGgLV1c40aVkxNS09RfQ4CgSC+vHA5xiMylug1dKgdi+bDJ9HTfxP9/kGkJiaMOb543gwkT/Ji4Jb2PWmrcDod+FmID5NajnXg+i1hM7TU9XPF9KnIz0pVPHb0TBcu9Q3gXiCAf7d1KN4mzu3CisoSA0dojPg4Nwqy0rCm1oe3N67D8vnKOzxXB/x49R97Yzw6Y5Vv2BoUO0OHWjI0j1pqNLW2q37C90SdD+/ta9N9bHr6yaoF+OHjtZrO+fLCZbz41i50998waFTmERm01+PGcpUr+0Aw+FDQrZ0XceW6H1kpiWNu68ubgqLsDHR29xo21lg6drYbb7Z8jo+OdYa8ULQzkReF9eXFSIyPUzzW2nkRVwf8D/49EAziwyPqF4eSPjksLcjG95dVYWlpkdlDMYzIoEMtN5pa28f8t+YQux2rqkvgcsp5msoKc/Dq86vxynOrFffg7U7OK/WV7LRHUFOsvPesdhE4cpGoJDM5EQvnyNiTHq2+vBi/fmaF2cPQnbi3aEOtDyrbrjjQfg79/kHFY82HT+K5b1ar3Odc7D1xWq8h6ur1nfvx+s79AO5/Vzre40FmciJmTs3E0tIifLtyNtwu5XlrWVkxlpYW4aNjnbEcsqHEzdBratTXvKE+SFFaioxYPG+66pf0rSQYBAaHhnH+aj92H+3AL95pxrON78J/e0j1nCe/MS+GIzSeqBm6qmga8jJTVI9vWb8cW9Yv13y/HpcLK6tK8Ne9R6IYnTm+ON+Dt/e04kcrHlU8XlaQE+MRGUvUDG3kjoSddzs6u9S3HVMS41U/GrcjMUEnxHlQH+JbZdGakzsZM3MyDbt/I03PTlc95r8zJGpPWkzQ9RUzkehV3nvWS0OdubP0yqoS/HL9cvjypoR9TknuZDyzpFL1eFefrE8LxayhtfyYVaRWVZeg8YN9uBcIGP5YSuI9bjTU+tBQ68PF3gHsOd6J42e70X7pCnpv3MLNwSG4XU6kJSageGomlpUVYXX1HMS51X8yXNIOByAk6KnpyagqylU9vu6Vv4T9Ncn4ODd2b3kBk7xjf8IkPWkSFvkKsef4qbGPsagcLz21NPxB4/634Y40blQ8tvWDT/DW7kOq507LSMbTi+dreryv898ewt/2H4vqPqxGxJIj1N5zZ3evpu/83h66G3LWsvPF4WjBIPCr91rEfUHJ9kE7HKH3nncc/K/m+9z5ufo5j82dofj9aTvx3xnC5je2Y1eIvXe7sn3QVUW5mJaRrHgsEAxi1yHtL9qBk+ce+gLTaG6XE6uq7fc9aeD+EuPPe1qxZsub4tbOI2y/hg51MXio40JEv6UGAkE0tbbjeyq7Aw21Przz8WHN9xut9/9zAodPX0JxdgaKcjJQnJOJKalJSIqPQ1K8F0kJcfC63bg9fBeDQ8Po9w/i7OVrONXTh4P/u4BDnRdw9545F7Sx4pD6Eys0Mdl+yUE0GoMmURg0icKgSRQGTaIwaBLFlvvQf9i80ewhqHrhd41mD2FCs90+tJVjHo1hm8NWSw67xAzYa6yS2CpoovEwaBKFQZMoDJpEYdAkCoMmURg0icKgSRQGTaIwaBKFQZMoDJpEYdAkCoMmURg0iWLJn1hR+xM5PzsX23FES+3/Q5KKjY1mD+Ehlgp6IgQgzchrZpWwLbPkYMz2ZpXXzxJBW+XJoOhY4XW0RNBEejE9aC3v6rp848ahNzuNVU9mz9KmB02kJ9sFbfWZry7f+mOUzFLbduFiMKTGdjM0USgMmkRh0CQKgyZRGDSJwqBJFAZNojBoEoVBkygMmkRh0CQKgyZRGDSJwqBJFAZNojBoEoVBkygMmkRh0CQKgyZRGDSJwqBJFAZNojBoEoVBkygMmkRh0CQKgyZRGDSJwqBJFAZNojBoEoVBkyimB22Vv7CR9GH262l60CSH2TEDFgnaCk8EyWCJoAFGbWcVGxst8/pZJmjAWk8Mhcdqr5ct/1o3wHpPpDTh/I2wVnwNLDVDE0WLQZMoDJpEYdAkCoMmURg0icKgSRQGTaIwaBKFQZMoDJpEYdAkCoMmURg0icKgSRQGTaIwaBKFQZMoDJpEYdAkCoMmURzlG7YGzR4EkV44Q5MozrZtmxxmD4JID23bNjk4Q5MoDJpEYdAkihO4v/YweyBE0RhpmDM0icKgSZQHQXPZQXY1ul3O0CQKgyZRHgqayw6ym683yxmaRBkTNGdpsgulVhVnaEZNVqfWKJccJIpq0JylyapCtRlyhmbUZDXjNcklB4kybtCcpckqwmkxrBmaUZPZwm0w7CUHoyazaGlP0xqaUVOsaW1O80Uho6ZYiaS1iHY5GDUZLdLGIt62Y9RklGja0iVK/nFipAc9JkldPljhbE3R0qsh3UPkbE1a6D0Z6v7RN2drCpcRrRgaH2drUmLkpBez2ZRxT2yx+p3blOUB454YzFh+WmK9y8BlsML10/8BIOEEECbTh2YAAAAASUVORK5CYII=">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkExMyDnl4XmiL/nhaforbfntIDpjITkvZzmpa0iLCAic2hvcnRfbmFtZSI6ICJBMTPnhaforbciLCAic3RhcnRfdXJsIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiIzJmNmY4ZiIsICJ0aGVtZV9jb2xvciI6ICIjMmY2ZjhmIiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTUFBQUFEQUNBWUFBQUJTM0d3SEFBQUxuRWxFUVZSNG5PM2RhV3dVNXhrSDhQK3VqMTNqOVpIRllBUEdnSTF0bHR2QkpxNGdTUnNTNnNhMjJrWnRJcVcwVXRwS2FTcFZPRlVyUmEzU0l5bnE4YUdZVm0xSVdvVkVTVlcxYWxIU2xFQ3djcWlDZ2dNa2R0S0V3NGhZTVFsZ0ROakcyRjZmL1dDTUV0aVozZG1kNDUxNS9yOVBGalBlZmJ6Ny9PZDk1OFFIeGF6YXZIWFM2UnJJT3UzYkh2WTVYY01uT1ZvTW01MEFaME5oK3h1ejZVbVAzV0d3N2MzWStHU0VYVUd3L0UzWStKUUtxNE5nMll1ejhjbE1WZ1hCOUJkbDQ1T1Z6QTZDMzh3WFkvT1QxY3p1TVZQU3hNWW5KNWd4R3FROEFyRDV5U2xtOUY1S0FXRHprOU5TN2NHa0E4RG1KMVdrMG90SkJZRE5UNnBKdGljTkI0RE5UNnBLcGpjTkJZRE5UNm96MnFNSkI0RE5UMjVocEZjVENnQ2JuOXdtMFo2Tkd3QTJQN2xWSXIxcjZxVVFSRzZqR3dCdS9jbnQ0dld3WmdEWS9PUVZlcjNNS1JDSkZqTUEzUHFUMTJqMWRMcmRoWkMxUXNFQVNvdkNLQzBNWTFGaEdLVkZZWVJETTVBZHpFUW9tSWxRTUlETTlEUU1qWXhpYUdRVVBmMVgwTmw5Q1NmUFhNQytvNTA0ZHJyYjZUL0JWamRjVHkxbDY3OWxVeDNxcTVmRVhhL3hGenZRMWRPWDFIdjRmTUNzM0JEbXo4cEhTVUVlNWhma1gvMDVIOFVGZWNnT1pHcis3bytmMzROZGg0OFpmcy9kUC9rbTVvUnprNm9YQUxwNit2RFUzbGJzT253VUV4UGVhNFhyN3lFUU9RTE1DR1RnanBWbENhMWJYeDNCOWowSGszcWZ0ZVVsZVBLNzl5VDF1MDZaWDVDSHgrL2ZpUG8xUy9DREhic3dNQngxdWlSTGZXb2ZRTXJXZjhPcWNtUmxaaVMwYmtOTnhPSnExRlJiV1lKdDMyNkVUNm5udUtYdStoNFhlUlNvb1RyeHBpNmVtWWZWaStaYVdJMjYxaXd1eHBkcmx6dGRocVd1VFlHa2JQMEw4ME9vS1M4MjlEdU5OUkcwZmZDeFJSVlpZM2hrRFB1UGRlTE5FMTA0ZXJvYkgxM29RLzlnRkg2L0Q3UHpRbGhUTmc5Zisyd1Z5dWNVNkw3T2wyNVpocDBIL21kVDFmWll0WG5yNVBTK2dMaDlnUHJxQ1B3R3gvV05WUlg0OWM0M01ESTJibEZWNWpsNTlnS2UydHVLbDQ4Y1IzUjA3TVlWeG9HdW5sNTA5ZlRpcFVOSDhjdXYxMkZqVllYbTY2MVlNQWZwYVg2TWpVOVlXTFZ6eEFYQXlQUm5XazVXQUxjdkswVkxlNGVoMzV1Y25NVDV2aXY0OEdyRG5lN3BtL3I1ZkMraVkyUFkrY2czRE5jU3ovZWVlakhoZGNjbkp2RFkzMTdGN2N0TEVjaUkzUW8rSHpBelp3Yk85UTZZVmFKUzBnRTUwNStsODJlanRDaXN1ZnhjN3dBSzgwTXhseldzalJnT3dKc2RYYmpycDMrS3VVenJmZXcyTUJ6RjhZL09ZK1hDT1pycitKeDlpTGdscHFkQm9uYUNHMnFXYWk0NzMzY0ZUK3crb0xsODNaS0Z1Q21VWlVWWmprdnphN2ZCeU5nNExsd2V0TEVhZTRrSlFKcmZqN3FidGVlNkxlMGRlUFdkazVwejNmUTBQK3B1cnJTcVBNZmtaQVZRUGxkN1IvanRVeDlqZEZ6OWZaOWtpUW5BdXNnQ2hFTXpOSmUzdEozQTVhRW9EcDc0VUhPZFJvK2RFMGp6Ky9Ib3ZSdVFtWjZtdWM1enJ4K3hzU0w3aWRrSmJvd3ovWmsrek5uUzFvSDFrWVV4MTFzNnZ4Q0xDc1A0NE54RkswcTBuTi9uUTFabUJ1YUdjMUZWTmcvM3JWK0pzcUtabXV2LzlUOXQySGUwMDc0Q0haQXVZUWM0RkF6Z3RtV0xOSmUzdEhkZzh1cW44UHE3Si9Ib3ZSdVFuaFo3Y0d5b2llRDMvOTV2UlptVzJQZXJoeEFLQmd6OVRuUjBETnYzSE1RenJ4MjJxQ28xck5xOGRWTEVGR2hqVmJubVlUNEEyUHYyaVdzLzl3L3FUNFBxcTVkNDd2S0FhUVBEVWZ4eDl3SGMvZGpUMlBIcTRXc2JCUzhURVFDOTZVOTMzd0RhT3o5OWxyZWxUZnR3WjFGK0Rtb1d6emV0TnBXRWdnSGN1MjRsdnJwdXBlRlJ3NjA4SDRCNU0zTjFyK1ZwYWV1NFlVdjMrcnZhUjRNQWIxOGdWNUNiamUvVTFlSWZqMnpTUFRmZ0ZaNFBRRU4xUkhmS0VtdHJIMjhhdEdIVllnUXp2WDM4b0NnL0I5c2Z1Z2VSNHRsT2wySXBiMytMbUxyMlIwdXM2YzgwdmFOQjJZRk0zTEZpTVY0K1l2eUdGYnV0ZitTSmF6LzcvVDVrQnpJeE41eUw1UXVLMEZBZFFWV3A5dWc0STVDQkxadnE4SlhmUE9mSm0yTUFqNDhBS3hmT1FjbXNmTTNsc2FZLzA3dzREWnFZbU1UbG9hbExILzc1MzNmeHdPLytqa2YvOGdyR0o3VC96dEtpTUQ2M1BMR2JoOXpJMHdHSWQrSnFiOXNKeldYOWcxRzA2a3lEYWl0S1VKQ2JuWFJ0cW5qcDBGRTg4NXIreVM2OVE4aHU1OWtwVUVaYW11NWx2Z0R3N09iN2tuNTl2OStIK3VvbGVEWk84N2pCdjFyZng3ZnVyTkZjdmpqT1BRTnU1dGtSNExabGk1QTNJMmpwZStqdFg3akp1YjdMdXN0enNyeDdTTlN6QWJEanVwMkt1UVdvbURmTDh2ZXgycXhjL1V1eis0ZUdiYXJFZnA0TVFGNTJFT3VYMmpOdjljSUZjdkgraG02UDNnd0RlRFFBZFZXVm10ZnltTzBMTjFmQzczZisyb2lLdVFYWS90QTl1R3UxL21VZjE5dFlWWUVIN3F6V1hlZmdjZTJEQVc3bnlaM2d4clgyYlpVTGNyUHhtY29GMkIvanFzbjg3Q3k4c2VYQnBGNTN5Nlk2Yk5sVUYzUFpEM2ZzdXVIdU5KL1BoOXJLRXRSV2xtQjRaQXlIVG5iaFVNZHBkSnpwUVdmM0pmUVBEbU5vWkJUQmpIUVU1dWRnZVVraDZxc2pxSzBzMGEwak9qcG0rRTQ0Ti9GY0FCYk92Z25MUzRvMGw1L3R2WXk3Zi80MEpneGM2ZFc0ZGlrZXYzK2o1dktHbWtqTUFEZ2xtSm1PVzVjdXdxMG1UQVAvOFBJQlhCb1lNcUVxTlhsdUNoVHZCTldMcmU4YmFuNWc2bWFaSzlFUnplVjNyQ2pUZmN5aFcrMCtjZ3pQdi9HVzAyVll5bE1COFBtQStqWGF6L3VjbUp6RUM2M3ZHWDdkNFpFeHZQS1c5a216UUVZNjdseGRidmgxVlRVNlBvNG5YMm5GajU3ZlkzaGo0VGFlQ3NDYXNtTGRCOE8ySHY4UVp5NzJKL1hhOFlMamhhTkJBOE5Sdk5ENkhyNjQ1Vms4c2Z1QWlQc0JQTFVQRUcvNnMvTmc4azg0ZTZmekRFNmR2YWo1V0pVMVpjVW91aWtIWnkvcG4xU3l5dkdQenVQelAvdnoxQ1BSQzhNb0xacUprbG41eU0wS0lEc1lRSFl3QTltQlRHU2tUVDBhZlRBNml0N0JJWFIyWDhLcHN4ZnhUdWNadkhtaXk5TTN3TWZpazNCTEpKRVdUMDJCaUl4aUFFZzBCb0JFWXdCSU5BYUFSSFA5WWRBbnY5L2tkQWtKZWZDM3pVNlhRREc0K2pDb1c1ci9reGdFdGJoMkN1VEc1Z2ZjVzdkWHVUWUFSR1pnQUVnMEJvQkVZd0JJTkFhQVJHTUFTRFFHZ0VSakFFZzBCb0JFWXdCSU5BYUFSR01BU0RRR2dFUmpBRWcwQm9CRVl3QklOQWFBUkZQK251QzI1cWFZLzk3cTR2K3pRZXR2OHFMVlRjMU9sNkJMNlJGQVVxTjRWVnR6azlMZm81SUJVUDFESStOVS9UNlZEQUI1azRvaFVDNEFLbjVJWkI3VnZsK2xBbURrdzdsRi8vOTJVNVpiNnphVFNpRlFLZ0JFZG5OMUFOeTBOYjJseEYzMVNxSDhlWUI0MkZTVUNsZVBBRVNwWWdCSU5BYUFSR01BU0RRR2dFUmpBRWcwQm9CRVl3QklOQWFBUkdNQVNEUUdnRVJqQUVnMEJvQkVZd0JJTkFhQVJHTUFTRFFHZ0VSakFFZzBCb0JFWXdCSU5BYUFSR01BU0RRR2dFUmpBRWcwQm9CRVl3QklOQWFBUkdNQVNEUUdnRVJqQUVnMEJvQkVZd0JJTkFhQVJHTUFTRFFHZ0VSakFFZzBwUUt3dXFuWjZSTElCaXA5ejBvRmdNaHV5Z1ZBcGEwRG1VKzE3MWU1QUFEcWZVaGtEaFcvVnlVREFLajVZVkh5VlAwK2xRMEFvTzZIUm9sYjNkU3M5UGVZN25RQlpsRDVBL2F5dHVZbXAwdEltZElqQUpIVkdBQVNqUUVnMFJnQUVvMEJJTkVZQUJLTkFTRFJHQUFTalFFZzBSZ0FFbzBCSU5FWUFCS05BU0RSR0FBU2pRRWcwUmdBRW8wQklORVlBQktOQVNEUkdBQVNqUUVnMFh5ck5tK2RkTG9JSXFkd0JDRFIvTzNiSHZZNVhRU1JFOXEzUGV6akNFQ2lNUUFrR2dOQW9qRUFKSm9mbU5vWmNMb1FJanROOXp4SEFCS05BU0RScmdXQTB5Q1M0cE85emhHQVJQdFVBRGdLa05kZDMrTWNBVWkwR3dMQVVZQzhLbFp2Y3dRZzBXSUdnS01BZVkxV1QzTUVJTkUwQThCUmdMeENyNWQxUndDR2dOd3VYZzl6Q2tTaXhRMEFSd0Z5cTBSNk42RVJnQ0VndDBtMFp4T2VBakVFNUJaR2V0WFFQZ0JEUUtvejJxT0dkNElaQWxKVk1yMloxRkVnaG9CVWsyeFBKbjBZbENFZ1ZhVFNpeW1kQjJBSXlHbXA5bURLSjhJWUFuS0tHYjFuYXZQeVNkTmtCek0zdXFaZUNzSFJnS3htZG85WjFyQWNEY2hNVm0xY0xkOWlNd2lVQ3F0bkZiWk5XUmdFTXNLdTZiVHRjM1lHZ2ZUWXZSL3A2RTRydzBDQXN3ZFBsRHRxdzFCNG0ycEhDdjhQMGhZNWQ1bWMvRFVBQUFBQVNVVk9SSzVDWUlJPSIsICJzaXplcyI6ICIxOTJ4MTkyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIn0sIHsic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTFFBQUFDMENBWUFBQUE5elFZeUFBQUtyMGxFUVZSNG5PM2RhV3dVNXgzSDhkOWVYaHM3dmcwMitBSWJNQXMrOEptQ0NFY2RTamxNbExRU0lrMnFwSlhTU20wNStpSjUwN3dvbGFwV1NURlJYclF2R2lWTjB5cVIya1lCaXAzV2hCQ0NTQWtHYzZReHRibkJObUJqREl2Qmh0MitJRVltbmxudjdNN3N6UHo5KzBnb1NtWm45OG51ZHgrZWVYWU5EbGhBK1lhdFFiUEhRTkZyMjdiSllmWVlUQmtBQTU0WXpBZzhaZy9JaUNlMldNVnQ2SU13WWxKaVpOeUczREZEcG5BWUViWlQ3enRrekJRdUkxclI3UjNDa0NrYWVzM1d1c3pRakptaXBWZERVYjByR0RJWklaclpPdUlabWpHVFVhSnBLNktnR1RNWkxkTEdOQWZObUNsV0ltbE5VOUNNbVdKTmEzTmhCODJZeVN4YTJnc3JhTVpNWmd1M3dYR0Rac3hrRmVHMHFQdEgzMFJtQ2hrMFoyZXltdkdhVkEyYU1aTlZoV3FUU3c0U1JURm96czVrZFdxTmpnbWFNWk5kS0xYcU5tTWdwSTlKWGcvcVp1V2p1amdYczZabUlpOHJGY2tKOFlqM3VERTRQSXpCTzhQbzZiK0pNNWV2NGNTNWJueDg0aFF1OWc2WVBXeERQZlExUGNtejh3L3FhL0RUMVF0RDNxYXB0UjB2L1dsWFJQZnZjYm1RbDVXQ2dxdzBGRTRlK1pXT3dzbHBTRW1NVnp3bkVBaWljdk0yVFkvamNBQjFzL0x4M1lWbGVHenVkSGhjTGszbkgyZy9oOWQyZklvdnp2ZG9Pcy9LUm4vZGRNTE0wR3RxZmVQZVptbHBFUjVKOE9MRzRCM045Ly9pVTB2d25RV2xrUXhOazZMc0RQeit4MDlHZlA2anMvTlJNek1YVzk1dHdmdWZuZEJ4Wk5Zd0lYWTV5Z3B6VURnNWJkemJlVDF1cktpY0hZTVJtY3ZsZE9MbGRmV29uREhON0tIbzdrSFFrcGNiYThPWW5VYzBhTGl0blRrZERteCtZcEhadzlERjZIYkZMem04SGplK1ZUa3I3TnVYRm1SaitwUjBuTzdwTTNCVStqalYzWWVXb3gxb08zMEpIVjI5dU9ZZlJEQVlSRVp5SWlvS2MvRDBrdm1ZbDUrdGV2NjgvR3prcENlanEwL09oYUw0b0plVkZTTXAzcXZwbkxXMVBqUnUzNmZwbktHNzkzQzZwdzluTDEvRG1hOStuYjF5LzUvL2ZQbDVKTVI1Tk4yZm1rQXdpSmFqSGZqanZ3NnFYdGgxOVEyZ3EyOEF6VWRPNGpmUHJzVGpGVE5WNzY4Z0sxVmUwQk4xdVhGbitDNjhuckh2NmRVMWMvRGF6azhSQ0lUL3RQejI3M3NpR1o1bXA3cjc4UE0zZG9SMTIwQWdpTWJ0bjRRTU9ubVM4ZzZNM1pSdjJCcHMyN2JKSWZxaWNFcHFFbXBuNVNrZWE3OTRCUjhlUHFsNExETTVFUXRtRnhnNXRKaTUxRGVBUUZEOWpYbmRmenVHb3pHZTZLRFgxUGpnZENqL1JIeFRhenVhVklJR2dMVjFjNDBhVmt4TlMwOVJmUTRDZ1NDK3ZIQTV4aU15bHVnMWRLZ2RpK2JESjlIVGZ4UDkva0drSmlhTU9iNTQzZ3drVC9KaTRKYjJQV21yY0RvZCtGbUlENU5ham5YZytpMWhNN1RVOVhQRjlLbkl6MHBWUEhiMFRCY3U5UTNnWGlDQWY3ZDFLTjRtenUzQ2lzb1NBMGRvalBnNE53cXkwckNtMW9lM042N0Q4dm5LT3p4WEIveDQ5Ujk3WXp3Nlk1VnYyQm9VTzBPSFdqSTBqMXBxTkxXMnEzN0M5MFNkRCsvdGE5TjliSHI2eWFvRitPSGp0WnJPK2ZMQ1piejQxaTUwOTk4d2FGVG1FUm0wMStQR2NwVXIrMEF3K0ZEUXJaMFhjZVc2SDFrcGlXTnU2OHViZ3FMc0RIUjI5eG8yMWxnNmRyWWJiN1o4am8rT2RZYThVTFF6a1JlRjllWEZTSXlQVXp6VzJua1JWd2Y4RC80OUVBeml3eVBxRjRlU1Bqa3NMY2pHOTVkVllXbHBrZGxETVl6SW9FTXRONXBhMjhmOHQrWVF1eDJycWt2Z2NzcDVtc29LYy9EcTg2dnh5bk9yRmZmZzdVN09LL1dWN0xSSFVGT3N2UGVzZGhFNGNwR29KRE01RVF2bnlOaVRIcTIrdkJpL2ZtYUYyY1BRbmJpM2FFT3REeXJicmpqUWZnNzkva0hGWTgySFQrSzViMWFyM09kYzdEMXhXcThoNnVyMW5mdngrczc5QU81L1Z6cmU0MEZtY2lKbVRzM0UwdElpZkx0eU50d3U1WGxyV1ZreGxwWVc0YU5qbmJFY3NxSEV6ZEJyYXRUWHZLRStTRkZhaW94WVBHKzY2cGYwclNRWUJBYUhobkgrYWo5MkgrM0FMOTVweHJPTjc4Si9lMGoxbkNlL01TK0dJelNlcUJtNnFtZ2E4akpUVkk5dldiOGNXOVl2MTN5L0hwY0xLNnRLOE5lOVI2SVluVG0rT04rRHQvZTA0a2NySGxVOFhsYVFFK01SR1V2VURHM2tqb1NkZHpzNnU5UzNIVk1TNDFVL0dyY2pNVUVueEhsUUgrSmJaZEdha3pzWk0zTXlEYnQvSTAzUFRsYzk1cjh6SkdwUFdrelE5UlV6a2VoVjNudldTME9kdWJQMHlxb1MvSEw5Y3ZqeXBvUjlUa251WkR5enBGTDFlRmVmckU4THhheWh0ZnlZVmFSV1ZaZWc4WU45dUJjSUdQNVlTdUk5YmpUVSt0QlE2OFBGM2dIc09kNko0MmU3MFg3cENucHYzTUxOd1NHNFhVNmtKU2FnZUdvbWxwVVZZWFgxSE1TNTFYOHlYTklPQnlBazZLbnB5YWdxeWxVOXZ1NlZ2NFQ5TmNuNE9EZDJiM2tCazd4amY4SWtQV2tTRnZrS3NlZjRxYkdQc2FnY0x6MjFOUHhCNC82MzRZNDBibFE4dHZXRFQvRFc3a09xNTA3TFNNYlRpK2RyZXJ5djg5OGV3dC8ySDR2cVBxeEd4SklqMU41elozZXZwdS84M2g2NkczTFdzdlBGNFdqQklQQ3I5MXJFZlVISjlrRTdIS0gzbm5jYy9LL20rOXo1dWZvNWo4MmRvZmo5YVR2eDN4bkM1amUyWTFlSXZYZTdzbjNRVlVXNW1KYVJySGdzRUF4aTF5SHRMOXFCaytjZStnTFRhRzZYRTZ1cTdmYzlhZUQrRXVQUGUxcXhac3ViNHRiT0kyeS9oZzUxTVhpbzQwSkV2NlVHQWtFMHRiYmpleXE3QXcyMVByeno4V0hOOXh1dDkvOXpBb2RQWDBKeGRnYUtjakpRbkpPSkthbEpTSXFQUTFLOEYwa0pjZkM2M2JnOWZCZURROFBvOXcvaTdPVnJPTlhUaDRQL3U0QkRuUmR3OTU0NUY3U3g0cEQ2RXlzME1kbCt5VUUwR29NbVVSZzBpY0tnU1JRR1RhSXdhQkxGbHZ2UWY5aTgwZXdocUhyaGQ0MW1EMkZDczkwK3RKVmpIbzFobThOV1N3Njd4QXpZYTZ5UzJDcG9vdkV3YUJLRlFaTW9ESnBFWWRBa0NvTW1VUmcwaWNLZ1NSUUdUYUl3YUJLRlFaTW9ESnBFWWRBa0NvTW1VUmcwaVdMSm4xaFIreE01UHpzWDIzRkVTKzMvUTVLS2pZMW1EK0VobGdwNklnUWd6Y2hyWnBXd0xiUGtZTXoyWnBYWHp4SkJXK1hKb09oWTRYVzBSTkJFZWpFOWFDM3Y2cnA4NDhhaE56dU5WVTltejlLbUIwMmtKOXNGYmZXWnJ5N2YrbU9VekZMYmR1RmlNS1RHZGpNMFVTZ01ta1JoMENRS2d5WlJHRFNKd3FCSkZBWk5vakJvRW9WQmt5Z01ta1JoMENRS2d5WlJHRFNKd3FCSkZBWk5vakJvRW9WQmt5Z01ta1JoMENRS2d5WlJHRFNKd3FCSkZBWk5vakJvRW9WQmt5Z01ta1JoMENRS2d5WlJHRFNKd3FCSkZBWk5vakJvRW9WQmt5aW1CMjJWdjdDUjlHSDI2Mmw2MENTSDJURURGZ25hQ2s4RXlXQ0pvQUZHYldjVkd4c3Q4L3BaSm1qQVdrOE1oY2RxcjVjdC8xbzN3SHBQcERUaC9JMndWbndOTERWREUwV0xRWk1vREpwRVlkQWtDb01tVVJnMGljS2dTUlFHVGFJd2FCS0ZRWk1vREpwRVlkQWtDb01tVVJnMGljS2dTUlFHVGFJd2FCS0ZRWk1vREpwRVlkQWtDb01tVVJ6bEc3WUd6UjRFa1Y0NFE1TW96clp0bXh4bUQ0SklEMjNiTmprNFE1TW9ESnBFWWRBa2loTzR2L1l3ZXlCRTBSaHBtRE0waWNLZ1NaUUhRWFBaUVhZMXVsM08wQ1FLZ3laUkhncWF5dzZ5bTY4M3l4bWFSQmtUTkdkcHNndWxWaFZuYUVaTlZxZldLSmNjSklwcTBKeWx5YXBDdFJseWhtYlVaRFhqTmNrbEI0a3lidENjcGNrcXdta3hyQm1hVVpQWndtMHc3Q1VIb3lhemFHbFAweHFhVVZPc2FXMU84MFVobzZaWWlhUzFpSFk1R0RVWkxkTEdJdDYyWTlSa2xHamEwaVZLL25GaXBBYzlKa2xkUGxqaGJFM1IwcXNoM1VQa2JFMWE2RDBaNnY3Uk4yZHJDcGNSclJnYUgyZHJVbUxrcEJlejJaUnhUMnl4K3AzYmxPVUI0NTRZekZoK1dtSzl5OEJsc01MMTAvOEJJT0VFRUNiVGgyWUFBQUFBU1VWT1JLNUNZSUk9IiwgInNpemVzIjogIjE4MHgxODAiLCAidHlwZSI6ICJpbWFnZS9wbmcifV19">
+<meta name="theme-color" content="#2f6f8f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="A13照護">
 <style>
   /* ====== 基本版面：模仿原系統的綠色底、左側病人清單、右側多頁輸入 ====== */
   :root{
@@ -42,6 +50,47 @@
   }
   .login-box button:hover{ background:#3a7fc0; }
   .login-error{ color:#e05a5a; font-size:18px; min-height:1.2em; text-align:center; }
+
+  /* ====== 通用彈出視窗（目前給「病床資料管理」用） ====== */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.5);
+    z-index:210; align-items:center; justify-content:center; padding:16px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:#fff; border-radius:8px; width:720px; max-width:100%;
+    max-height:88vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  .modal-header{
+    background:#2f6f8f; color:#fff; padding:12px 16px; font-size:22px; font-weight:bold;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .modal-close{
+    background:none; border:1px solid rgba(255,255,255,.6); color:#fff;
+    border-radius:4px; padding:2px 10px; font-size:18px; cursor:pointer;
+  }
+  .modal-body{ padding:16px; overflow-y:auto; }
+
+  table.bedcrud-table{ max-width:none; width:100%; }
+  table.bedcrud-table td, table.bedcrud-table th{ font-size:16px; padding:6px 8px; }
+  .bedcrud-table .cardno{ font-size:1.4em; }
+  .bedcrud-edit-btn, .bedcrud-del-btn{
+    padding:4px 10px; margin:0 3px; border-radius:4px; cursor:pointer; border:1px solid #999;
+  }
+  .bedcrud-del-btn{ background:#e05a5a; color:#fff; border-color:#e05a5a; }
+
+  .bed-crud-form{ display:flex; flex-direction:column; gap:10px; }
+  .bf-row{ display:flex; align-items:center; gap:10px; }
+  .bf-row label{ width:80px; flex:0 0 auto; font-weight:bold; color:#2b5d2b; }
+  .bf-row input, .bf-row select{
+    flex:1; padding:8px; border:1px solid #999; border-radius:4px; font-size:18px;
+  }
+  .bf-warn{ color:#cc7a00; font-size:16px; min-height:1.2em; }
+  .bf-actions{ display:flex; gap:10px; margin-top:6px; }
+  .bf-actions button{ padding:8px 18px; font-size:18px; border-radius:4px; cursor:pointer; }
+  .bf-actions button.primary{ background:var(--blue); color:#fff; border:1px solid var(--blue); }
+  .bf-actions button:not(.primary){ background:#fff; border:1px solid #999; }
 
   /* 上方標題列 */
   .titlebar{
@@ -293,6 +342,11 @@
     .toolbar button{ padding:6px 8px; font-size:15px; }
     .toolbar .note{ display:none; } /* 手機畫面窄，說明文字先隱藏，避免擠壓按鈕 */
 
+    .modal-box{ width:100%; max-height:94vh; }
+    .modal-header{ font-size:18px; }
+    .bf-row{ flex-direction:column; align-items:stretch; gap:4px; }
+    .bf-row label{ width:auto; }
+
     .patientbar{ font-size:18px; gap:6px 10px; padding:6px 8px 6px 0; }
     .toggle-patientbar-btn{ padding:6px 12px; font-size:16px; }
 
@@ -372,6 +426,7 @@
     <input type="text" id="recTime" class="f-time" placeholder="HH:MM" inputmode="numeric" maxlength="5">
     <button id="btnNow" style="margin-left:6px;">帶入現在時間</button>
     <span class="lbl">卡號：</span><span id="recordCardNo" class="cardno"></span>
+    <button type="button" id="btnBedCrud" style="margin-left:auto;">🛏 病床資料管理</button>
   </div>
 
   <div class="patientbar-wrap">
@@ -391,7 +446,7 @@
         <button data-shift="大夜">大夜</button>
       </div>
       <div class="shead">
-        <span class="shead-title">病人清單（31 床）</span>
+        <span class="shead-title" id="shead-title">病人清單（31 床）</span>
         <div class="bed-nav">
           <button type="button" id="btnPrevBed" class="nav-btn" title="上一床">▲</button>
           <select id="bedSelect" class="bed-select" title="直接跳到指定床號"></select>
@@ -437,6 +492,55 @@
   <div class="statusbar">
     <span id="statusLeft">就緒</span>
     <span id="statusRight"></span>
+  </div>
+</div>
+
+<!-- 病床資料管理（CRUD）：床號/病歷號/姓名/性別/出生/年齡/卡號/醫師/科別/身份/管路/血型/診斷
+     這份基本資料是整個 A13 系統輸入照護紀錄時的「底」，所以獨立管理，
+     跟每一床每一班別的照護紀錄、電子版組別分配都是分開存的。 -->
+<div class="modal-overlay" id="bedCrudOverlay">
+  <div class="modal-box bed-crud-box">
+    <div class="modal-header">
+      <span>🛏 病床資料管理</span>
+      <button type="button" class="modal-close" id="btnCloseBedCrud">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="bedCrudListView">
+        <button type="button" class="primary" id="btnNewBed" style="margin-bottom:10px;">＋ 新增病床</button>
+        <div style="overflow-x:auto;">
+          <table class="iotable bedcrud-table">
+            <thead><tr>
+              <th>床號</th><th>卡號</th><th>姓名</th><th>性別</th><th>身份</th><th>操作</th>
+            </tr></thead>
+            <tbody id="bedCrudListBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <form id="bedCrudForm" class="bed-crud-form" style="display:none;">
+        <input type="hidden" id="bf_originalCardNo">
+        <div class="bf-row"><label>床號</label><input type="text" id="bf_床號" required></div>
+        <div class="bf-row"><label>病歷號</label><input type="text" id="bf_病歷號" required></div>
+        <div class="bf-row"><label>姓名</label><input type="text" id="bf_姓名" required></div>
+        <div class="bf-row"><label>性別</label>
+          <select id="bf_性別"><option value="男">男</option><option value="女">女</option></select>
+        </div>
+        <div class="bf-row"><label>出生</label><input type="text" id="bf_出生" placeholder="YYYY-MM-DD"></div>
+        <div class="bf-row"><label>年齡</label><input type="text" id="bf_年齡" inputmode="numeric"></div>
+        <div class="bf-row"><label>卡號</label><input type="text" id="bf_卡號" required></div>
+        <div class="bf-row"><label>醫師</label><input type="text" id="bf_醫師"></div>
+        <div class="bf-row"><label>科別</label><input type="text" id="bf_科別"></div>
+        <div class="bf-row"><label>身份</label><input type="text" id="bf_身份"></div>
+        <div class="bf-row"><label>管路</label><input type="text" id="bf_管路"></div>
+        <div class="bf-row"><label>血型</label><input type="text" id="bf_血型"></div>
+        <div class="bf-row"><label>診斷</label><input type="text" id="bf_診斷"></div>
+        <div class="bf-warn" id="bf_warn"></div>
+        <div class="bf-actions">
+          <button type="submit" class="primary">💾 儲存</button>
+          <button type="button" id="btnBedFormCancel">取消</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -783,7 +887,7 @@ function buildTab6(){
   }).join('');
 
   return `<div class="group">
-    <div class="gtitle">電子版｜組別分配（31 床）</div>
+    <div class="gtitle">電子版｜組別分配（${patients.length} 床）</div>
     <div class="row">
       <span class="lbl">顏色</span>
       <span class="group-legend grp-blue">藍色</span>
@@ -873,6 +977,192 @@ const patients = [
 ];
 let currentPatientIndex = 0;
 
+/* ================= 病床資料管理（CRUD） =================
+   床號/病歷號/姓名/性別/出生/年齡/卡號/醫師/科別/身份/管路/血型/診斷，
+   這 13 個欄位是整個 A13 系統所有照護紀錄輸入的「底」。跟每床每班別的照護紀錄、
+   電子版組別分配一樣，這份資料也是全部病床共用的一份，用卡號當唯一識別碼，
+   獨立存在 Firestore 的 a13patients 集合裡，一床一份文件。 */
+const PATIENTS_COLLECTION = 'a13patients';
+const PATIENT_FIELDS = ['床號','病歷號','姓名','性別','出生','年齡','卡號','醫師','科別','身份','管路','血型','診斷'];
+
+function blankSlots(){
+  const s = {};
+  SHIFTS.forEach(sh=>{ s[sh] = { fields:{}, date:'', time:'', saved:false, savedAt:'' }; });
+  return s;
+}
+
+async function savePatientToCloud(info){
+  await db.collection(PATIENTS_COLLECTION).doc(info.卡號).set(info);
+}
+async function deletePatientFromCloud(cardNo){
+  await db.collection(PATIENTS_COLLECTION).doc(cardNo).delete();
+}
+
+// 登入後呼叫：雲端還沒有病床資料（第一次使用）就把內建的示範資料上傳上去、之後都以雲端為準；
+// 雲端已經有資料，就整批換成雲端版本（卡號相同的病人沿用本地既有的 slots 草稿，不會不見）。
+async function loadPatientsFromCloud(){
+  try{
+    const snap = await db.collection(PATIENTS_COLLECTION).get();
+    if(snap.empty){
+      await Promise.all(patients.map(p=>savePatientToCloud(p.info)));
+      return;
+    }
+    const cloudInfos = [];
+    snap.forEach(doc=> cloudInfos.push(doc.data()));
+    const rebuilt = cloudInfos.map(info=>{
+      const existing = patients.find(p=>p.info.卡號 === info.卡號);
+      return { info, slots: existing ? existing.slots : blankSlots() };
+    });
+    patients.length = 0;
+    rebuilt.forEach(p=>patients.push(p));
+    if(currentPatientIndex >= patients.length) currentPatientIndex = 0;
+  }catch(err){
+    console.error('載入病床基本資料失敗，暫時使用內建示範資料：', err);
+  }
+}
+
+function updateBedCountLabel(){
+  const el = document.getElementById('shead-title');
+  if(el) el.textContent = `病人清單（${patients.length} 床）`;
+}
+
+// 病床名單本身有變動（新增/刪除/編輯）之後，畫面上所有跟名單有關的地方都要重新整理一次
+function refreshAfterPatientListChange(){
+  updateBedCountLabel();
+  renderBedSelect();
+  loadSlotIntoForm(getCurrentSlot());
+  document.getElementById('tab6').innerHTML = buildTab6();
+  renderPatientList();
+  renderPatientBar();
+  renderSlotStatus();
+  updateStatusRight();
+  updateDependencies();
+}
+
+function renderBedCrudList(){
+  const tbody = document.getElementById('bedCrudListBody');
+  tbody.innerHTML = patients.map((p,i)=>{
+    const info = p.info;
+    return `<tr>
+      <td>${info.床號||''}</td>
+      <td class="cardno">${info.卡號||''}</td>
+      <td>${info.姓名||''}</td>
+      <td>${info.性別||''}</td>
+      <td>${info.身份||''}</td>
+      <td>
+        <button type="button" class="bedcrud-edit-btn" data-idx="${i}">編輯</button>
+        <button type="button" class="bedcrud-del-btn" data-idx="${i}">刪除</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function showBedCrudList(){
+  document.getElementById('bedCrudListView').style.display = '';
+  document.getElementById('bedCrudForm').style.display = 'none';
+  document.getElementById('bf_warn').textContent = '';
+}
+
+// index 為 null 表示「新增病床」；index 為數字表示「編輯 patients[index]」
+function openBedForm(index){
+  const bform = document.getElementById('bedCrudForm');
+  document.getElementById('bedCrudListView').style.display = 'none';
+  bform.style.display = 'flex';
+  document.getElementById('bf_warn').textContent = '';
+  const info = (index != null) ? patients[index].info : {};
+  document.getElementById('bf_originalCardNo').value = (index != null) ? (info.卡號||'') : '';
+  PATIENT_FIELDS.forEach(f=>{
+    const el = document.getElementById('bf_'+f);
+    if(el) el.value = info[f] || (f==='性別' && index==null ? '男' : '');
+  });
+  bform.dataset.editIndex = (index != null) ? String(index) : '';
+}
+
+document.getElementById('bedCrudForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const warnEl = document.getElementById('bf_warn');
+  const newInfo = {};
+  PATIENT_FIELDS.forEach(f=>{ newInfo[f] = document.getElementById('bf_'+f).value.trim(); });
+  if(!newInfo.床號 || !newInfo.病歷號 || !newInfo.姓名 || !newInfo.卡號){
+    warnEl.textContent = '床號、病歷號、姓名、卡號為必填。';
+    return;
+  }
+  const editIndexStr = e.target.dataset.editIndex;
+  const isEdit = editIndexStr !== '';
+  const originalCardNo = document.getElementById('bf_originalCardNo').value;
+
+  // 卡號是這套系統的唯一識別碼，新增/編輯時都要檢查有沒有跟別床撞號
+  const dupIdx = patients.findIndex((p,i)=> p.info.卡號 === newInfo.卡號 && (!isEdit || i !== Number(editIndexStr)));
+  if(dupIdx >= 0){
+    warnEl.textContent = `卡號 ${newInfo.卡號} 已經被「${patients[dupIdx].info.床號} ${patients[dupIdx].info.姓名}」使用，請換一個卡號。`;
+    return;
+  }
+
+  if(isEdit){
+    const idx = Number(editIndexStr);
+    const changingKey = originalCardNo && originalCardNo !== newInfo.卡號;
+    if(changingKey){
+      const ok = confirm(
+        `卡號從 ${originalCardNo} 改成 ${newInfo.卡號}，這位病人先前存過的照護紀錄會找不到對應（等於從空白重新開始累積）。\n確定要更改卡號嗎？`
+      );
+      if(!ok) return;
+    }
+    patients[idx].info = newInfo;
+    try{
+      await savePatientToCloud(newInfo);
+      if(changingKey) await deletePatientFromCloud(originalCardNo); // 換卡號了，把舊文件刪掉避免留下孤兒資料
+    }catch(err){
+      warnEl.textContent = '同步雲端失敗，請檢查網路連線後再試一次。';
+      return;
+    }
+  } else {
+    patients.push({ info:newInfo, slots: blankSlots() });
+    try{
+      await savePatientToCloud(newInfo);
+    }catch(err){
+      patients.pop();
+      warnEl.textContent = '同步雲端失敗，請檢查網路連線後再試一次。';
+      return;
+    }
+  }
+
+  refreshAfterPatientListChange();
+  showBedCrudList();
+  renderBedCrudList();
+});
+
+document.addEventListener('click', async (e)=>{
+  if(e.target.id === 'btnBedCrud'){
+    document.getElementById('bedCrudOverlay').classList.add('show');
+    showBedCrudList();
+    renderBedCrudList();
+  }
+  if(e.target.id === 'btnCloseBedCrud'){
+    document.getElementById('bedCrudOverlay').classList.remove('show');
+  }
+  if(e.target.id === 'btnNewBed'){ openBedForm(null); }
+  if(e.target.id === 'btnBedFormCancel'){ showBedCrudList(); }
+  if(e.target.classList.contains('bedcrud-edit-btn')){
+    openBedForm(Number(e.target.dataset.idx));
+  }
+  if(e.target.classList.contains('bedcrud-del-btn')){
+    const idx = Number(e.target.dataset.idx);
+    const p = patients[idx];
+    if(patients.length <= 1){ alert('至少要保留一床，不能刪除最後一床。'); return; }
+    const ok = confirm(
+      `確定要刪除「${p.info.床號} ${p.info.姓名}（${p.info.卡號}）」這一床嗎？\n這只會刪除病床基本資料，之前存過的照護紀錄不會自動被刪除，但也不會再顯示出來。`
+    );
+    if(!ok) return;
+    try{ await deletePatientFromCloud(p.info.卡號); }
+    catch(err){ console.error('刪除病床基本資料失敗：', err); }
+    patients.splice(idx, 1);
+    if(currentPatientIndex >= patients.length) currentPatientIndex = patients.length - 1;
+    refreshAfterPatientListChange();
+    renderBedCrudList();
+  }
+});
+
+
 /* ================= 畫面初始化 ================= */
 const form = document.getElementById('careForm');
 
@@ -887,6 +1177,7 @@ function buildStaticUI(){
   document.getElementById('tab6').innerHTML = buildTab6(); // 電子版組別分配，先用空白資料把表格骨架建起來
 
   renderShiftTabs();
+  updateBedCountLabel();
   renderBedSelect(); // 病床下拉選單的選項清單（只需要建立一次）
   loadSlotIntoForm(getCurrentSlot()); // 先用本地空白草稿把表單骨架建起來（含 5-3 表格預設一列）
   renderPatientList();
@@ -948,8 +1239,11 @@ function buildStaticUI(){
 // 登入成功後才呼叫：去 Firestore 把 93 格資料的目前狀態抓下來，蓋過本地的空白草稿
 async function initAfterLogin(){
   document.getElementById('statusLeft').textContent = '正在從雲端載入資料...';
+  await loadPatientsFromCloud(); // 先把病床基本資料（CRUD 那份）載好，後面配對照護紀錄才會準
   await loadAllSlotsFromCloud();
   await loadGroupAssignments();
+  renderBedSelect(); // 病床名單可能因為雲端資料而跟內建示範不一樣，下拉選單要重建
+  updateBedCountLabel();
   loadSlotIntoForm(getCurrentSlot());
   document.getElementById('tab6').innerHTML = buildTab6(); // 用剛載入的組別分配資料重新畫一次表格
   renderPatientList();
@@ -1317,7 +1611,7 @@ function renderSlotStatus(){
 function updateStatusRight(){
   let count = 0;
   patients.forEach(p=>{ SHIFTS.forEach(s=>{ if(p.slots[s].saved) count++; }); });
-  document.getElementById('statusRight').textContent = `已存檔：${count} / 93 格（31 床 × 3 班別）`;
+  document.getElementById('statusRight').textContent = `已存檔：${count} / ${patients.length*SHIFTS.length} 格（${patients.length} 床 × ${SHIFTS.length} 班別）`;
 }
 
 /* ---------- 表單 <-> 資料 ---------- */
@@ -1458,12 +1752,15 @@ async function saveRecord(){
   document.getElementById('statusLeft').textContent = `已存檔並同步雲端：${currentShift}．${p.床號} ${p.姓名}（${slot.date} ${slot.time}）`;
 }
 
-/* ---------- Firestore 讀寫：每一格資料的文件 ID 用「班別_床號」當索引鍵 ---------- */
+/* ---------- Firestore 讀寫：每一格資料的文件 ID 用「班別_卡號」當索引鍵 ----------
+   用「卡號」而不是「床號」當穩定鍵，是因為病人換床是常有的事、床號可能會變，
+   卡號（病歷卡號）才是跟著病人走、不會變的識別碼——這樣之後在「病床資料管理」
+   裡改床號，也不會讓已經存好的照護紀錄對不回來。 */
 function slotDocId(patient, shift){
-  return `${shift}_${patient.info.床號}`;
+  return `${shift}_${patient.info.卡號}`;
 }
 
-// 把某一格（班別＋床號）的草稿或已存資料寫回 Firestore，失敗時只記錄，不擋住畫面操作
+// 把某一格（班別＋病人）的草稿或已存資料寫回 Firestore，失敗時只記錄，不擋住畫面操作
 // （本地的 patients[].slots 已經先更新過了，就算這次雲端同步失敗，資料也不會不見）
 async function saveSlotToCloud(patientIndex, shift, slot){
   const p = patients[patientIndex];
@@ -1482,7 +1779,7 @@ async function saveSlotToCloud(patientIndex, shift, slot){
   }
 }
 
-// 讀取某一格（班別＋床號）在雲端的最新資料；讀不到（尚未有人存過或離線）就退回本地快取
+// 讀取某一格（班別＋病人）在雲端的最新資料；讀不到（尚未有人存過或離線）就退回本地快取
 async function loadSlotFromCloud(patientIndex, shift){
   const p = patients[patientIndex];
   try{
@@ -1502,15 +1799,15 @@ async function loadSlotFromCloud(patientIndex, shift){
   return p.slots[shift];
 }
 
-// 開機／登入時一次把 93 格資料的目前狀態都抓下來，填進本地的 patients[].slots
+// 開機／登入時一次把所有格子資料的目前狀態都抓下來，填進本地的 patients[].slots
 async function loadAllSlotsFromCloud(){
   try{
     const snap = await db.collection(RECORDS_COLLECTION).get();
     snap.forEach(doc=>{
       const d = doc.data();
       if(!SHIFTS.includes(d.shift)) return;
-      const patient = patients.find(p=>p.info.床號 === d.bed);
-      if(!patient) return; // 目前 31 床清單找不到對應床位就略過
+      const patient = patients.find(p=>p.info.卡號 === d.cardNo) || patients.find(p=>p.info.床號 === d.bed);
+      if(!patient) return; // 目前病床清單找不到對應病人就略過
       patient.slots[d.shift] = {
         fields: d.fields||{}, date: d.date||'', time: d.time||'',
         saved: !!d.saved, savedAt: '', updatedBy: d.updatedBy||'', updatedAt: d.updatedAt||''
@@ -1603,18 +1900,20 @@ async function importXml(text){
   document.getElementById('statusLeft').textContent = '匯入中，同步寫回雲端...';
   const writes = [];
 
-  // 扁平化格式：每一筆 <紀錄> 自己就帶著 班別／床號／姓名／性別 當索引鍵，
-  // 用「床號」比對回對應的那一床（找不到床號就退而用病歷號比對），
-  // 直接寫回該床、該班別自己的那一格，不會有跳位問題。
+  // 扁平化格式：每一筆 <紀錄> 自己就帶著 班別／床號／卡號／姓名／性別 當索引鍵，
+  // 優先用「卡號」比對回對應的病人（卡號比較穩定，床號可能因為換床而改變），
+  // 找不到卡號才退而用床號、病歷號比對，直接寫回該病人、該班別自己的那一格，不會有跳位問題。
   // 匯入的同時也順便寫回 Firestore，這樣「匯入 XML」也能當作是「從備份還原雲端資料」的功能。
   doc.querySelectorAll('紀錄').forEach(rEl=>{
+    const cardNo = rEl.getAttribute('卡號');
     const bedNo = rEl.getAttribute('床號');
     const chartNo = rEl.getAttribute('病歷號');
     const shift = rEl.getAttribute('班別') || '白班';
-    const patientIndex = patients.findIndex(p=>p.info.床號 === bedNo);
-    const patient = patientIndex >= 0 ? patients[patientIndex]
-                   : (chartNo ? patients.find(p=>p.info.病歷號 === chartNo) : null);
-    if(!patient) return; // 目前 31 床清單裡找不到對應床位，略過這筆，不憑空捏造病人
+    let patientIndex = cardNo ? patients.findIndex(p=>p.info.卡號 === cardNo) : -1;
+    if(patientIndex < 0) patientIndex = patients.findIndex(p=>p.info.床號 === bedNo);
+    if(patientIndex < 0 && chartNo) patientIndex = patients.findIndex(p=>p.info.病歷號 === chartNo);
+    const patient = patientIndex >= 0 ? patients[patientIndex] : null;
+    if(!patient) return; // 目前病床清單裡找不到對應病人，略過這筆，不憑空捏造病人
 
     const fields = {};
     rEl.querySelectorAll('欄位').forEach(fEl=>{
