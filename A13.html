@@ -219,7 +219,8 @@
   /* 這一列的日期/時間欄位縮小一倍（其他分頁裡的時間欄位不受影響，維持原本的放大字級）
      用 !important 是因為後面全域的 input.f-time 放大規則跟這裡的 specificity 太接近，
      用 !important 才能保證這個小範圍的例外一定生效，不會被蓋掉 */
-  .recorddate input{ padding:3px 5px !important; font-size:1em !important; }
+  .recorddate input{ padding:2px 4px !important; font-size:0.5em !important; }
+  .recorddate input#recTime{ width:60px !important; } /* 時間欄位寬度再縮小約 50% */
 
   .panelwrap{ flex:1; overflow-y:auto; padding:10px 14px; background:var(--green-bg2); border:1px solid var(--border); border-top:none;}
   .tabpanel{ display:none; }
@@ -420,7 +421,7 @@
   </div>
 
   <div class="recorddate">
-    <span>照顧紀錄日期</span>
+    <span>記錄日期</span>
     <input type="date" id="recDate">
     <span>時間</span>
     <input type="text" id="recTime" class="f-time" placeholder="HH:MM" inputmode="numeric" maxlength="5">
