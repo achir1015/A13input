@@ -1510,10 +1510,12 @@ function applyShiftColorTheme(){
     const el = document.getElementById(id);
     if(el) el.style.color = color;
   });
+  // 「（班別）」這個標示固定用深紅色，不跟著白班/小夜/大夜變色
+  // （白班若也用白色，淺綠色底看不清楚，深紅色三種班別都清楚好讀）
   const shiftLabel = document.getElementById('recordShiftLabel');
   if(shiftLabel){
     shiftLabel.textContent = `（${currentShift}）`;
-    shiftLabel.style.color = color;
+    shiftLabel.style.color = '#8b0000';
     shiftLabel.style.fontWeight = 'bold';
   }
 }
