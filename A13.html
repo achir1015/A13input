@@ -595,6 +595,7 @@ document.getElementById('btnLogout').addEventListener('click', ()=>{
 
 // 只要登入狀態改變（登入成功／登出）就會觸發這裡：
 // 登入 -> 顯示系統本體、去雲端載入 93 格資料；登出 -> 蓋回登入畫面
+let loggedInUid = null; // 記住目前是哪個帳號登入的，避免同一個帳號重複觸發 initAfterLogin 把畫面洗掉
 auth.onAuthStateChanged(user=>{
   const loginOverlay = document.getElementById('loginOverlay');
   const appRoot = document.getElementById('appRoot');
@@ -602,8 +603,15 @@ auth.onAuthStateChanged(user=>{
     loginOverlay.style.display = 'none';
     appRoot.style.display = 'flex';
     document.getElementById('loginInfo').textContent = `已登入：${user.email}`;
-    initAfterLogin();
+    // Firebase 有時候會用同一個帳號重複觸發這個事件（例如背景分頁重新取得焦點、
+    // Token 背景刷新等），如果帳號沒變就不要重跑 initAfterLogin，
+    // 不然會把使用者正在編輯、還沒存檔的內容整個重新載入蓋掉。
+    if(loggedInUid !== user.uid){
+      loggedInUid = user.uid;
+      initAfterLogin();
+    }
   } else {
+    loggedInUid = null;
     appRoot.style.display = 'none';
     loginOverlay.style.display = 'flex';
     document.getElementById('loginPassword').value = '';
@@ -1232,6 +1240,21 @@ function buildStaticUI(){
   // 這裡擋掉表單的預設送出行為，Enter 鍵就只會讓輸入框失焦，不會再讓頁面跳轉。
   form.addEventListener('submit', (e)=> e.preventDefault());
   form.addEventListener('change', updateDependencies);
+
+  // 自動存檔草稿：手機瀏覽器有時候會在切換到背景一陣子後，把分頁重新整理、
+  // 記憶體全部清空重來（這是手機作業系統本身的省電/省記憶體機制，網頁沒辦法完全擋掉）。
+  // 為了不要因為這樣把使用者正在輸入、還沒按存檔的內容弄丟，這裡改成「停止輸入 1.5 秒
+  // 就自動把目前這一格同步一次到雲端」，把可能遺失的範圍從「一整段編輯」縮小到「最後 1.5 秒」。
+  let autoDraftTimer = null;
+  form.addEventListener('input', ()=>{
+    clearTimeout(autoDraftTimer);
+    autoDraftTimer = setTimeout(()=>{
+      if(!auth.currentUser) return; // 還沒登入就不用同步
+      const slot = getCurrentSlot();
+      captureFormIntoSlot(slot);
+      saveSlotToCloud(currentPatientIndex, currentShift, slot);
+    }, 1500);
+  });
 
   document.getElementById('btnSave').addEventListener('click', saveRecord);
   document.getElementById('btnExport').addEventListener('click', exportXml);
