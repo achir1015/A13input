@@ -160,6 +160,10 @@
     font-size:20px; cursor:pointer;
   }
   .shifttabs button.active{ background:var(--pink); font-weight:bold; }
+  /* 三個班別各自固定的文字顏色，不管有沒有被選中都維持這個顏色，方便一眼辨識 */
+  .shifttabs button[data-shift="白班"]{ color:#ffffff; }
+  .shifttabs button[data-shift="小夜"]{ color:#9fd6ff; }
+  .shifttabs button[data-shift="大夜"]{ color:#ff5c5c; }
   .sidebar .shead{
     padding:8px; font-weight:bold; background:#eee; border-bottom:1px solid #ccc;
     display:flex; flex-direction:column; gap:6px;
@@ -184,6 +188,7 @@
 
   /* 卡號（Q08xxx）特別放大一倍、粗體、紅色，方便一眼辨識 */
   .cardno{ font-size:2em; font-weight:bold; color:#e02020; }
+  #recordShiftLabel{ margin-left:6px; }
   .plist .pitem.active .no{ color:#eaffea; }
 
   .sidebar .hhead{
@@ -421,12 +426,12 @@
   </div>
 
   <div class="recorddate">
-    <span>記錄日期</span>
+    <span id="lblRecordDate">記錄日期</span>
     <input type="date" id="recDate">
-    <span>時間</span>
+    <span id="lblRecordTime">時間</span>
     <input type="text" id="recTime" class="f-time" placeholder="HH:MM" inputmode="numeric" maxlength="5">
     <button id="btnNow" style="margin-left:6px;">帶入現在時間</button>
-    <span class="lbl">卡號：</span><span id="recordCardNo" class="cardno"></span>
+    <span class="lbl" id="lblCardNo">卡號：</span><span id="recordCardNo" class="cardno"></span><span id="recordShiftLabel"></span>
     <button type="button" id="btnBedCrud" style="margin-left:auto;">🛏 病床資料管理</button>
   </div>
 
@@ -1487,10 +1492,30 @@ function getCurrentSlot(){
   return patients[currentPatientIndex].slots[currentShift];
 }
 
+// 三個班別各自固定的顏色（白班=白色、小夜=淡藍色、大夜=紅色），
+// 跟班別按鈕的文字顏色是同一套，讓最上面「記錄日期／時間／卡號」那一列
+// 一眼就能看出現在是哪個班別，不用特別去看左側按鈕。
+const SHIFT_TEXT_COLOR = { 白班:'#ffffff', 小夜:'#9fd6ff', 大夜:'#ff5c5c' };
+
 function renderShiftTabs(){
   document.querySelectorAll('#shiftTabs button').forEach(b=>{
     b.classList.toggle('active', b.dataset.shift===currentShift);
   });
+  applyShiftColorTheme();
+}
+
+function applyShiftColorTheme(){
+  const color = SHIFT_TEXT_COLOR[currentShift] || '#333';
+  ['lblRecordDate','lblRecordTime','lblCardNo'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.color = color;
+  });
+  const shiftLabel = document.getElementById('recordShiftLabel');
+  if(shiftLabel){
+    shiftLabel.textContent = `（${currentShift}）`;
+    shiftLabel.style.color = color;
+    shiftLabel.style.fontWeight = 'bold';
+  }
 }
 
 // 切換到「某一床＋某一班別」：先把目前畫面存回原本那一格（背景同步到雲端），
