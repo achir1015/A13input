@@ -161,8 +161,8 @@
   }
   .shifttabs button.active{ background:var(--pink); font-weight:bold; }
   /* 三個班別各自固定的文字顏色，不管有沒有被選中都維持這個顏色，方便一眼辨識 */
-  .shifttabs button[data-shift="白班"]{ color:#ffffff; }
-  .shifttabs button[data-shift="小夜"]{ color:#9fd6ff; }
+  .shifttabs button[data-shift="白班"]{ color:#b8860b; }
+  .shifttabs button[data-shift="小夜"]{ color:#1a3fa0; }
   .shifttabs button[data-shift="大夜"]{ color:#ff5c5c; }
   .sidebar .shead{
     padding:8px; font-weight:bold; background:#eee; border-bottom:1px solid #ccc;
@@ -1497,7 +1497,7 @@ function getCurrentSlot(){
 // 三個班別各自固定的顏色（白班=白色、小夜=淡藍色、大夜=紅色），
 // 跟班別按鈕的文字顏色是同一套，讓最上面「記錄日期／時間／卡號」那一列
 // 一眼就能看出現在是哪個班別，不用特別去看左側按鈕。
-const SHIFT_TEXT_COLOR = { 白班:'#ffffff', 小夜:'#9fd6ff', 大夜:'#ff5c5c' };
+const SHIFT_TEXT_COLOR = { 白班:'#b8860b', 小夜:'#1a3fa0', 大夜:'#ff5c5c' };
 
 function renderShiftTabs(){
   document.querySelectorAll('#shiftTabs button').forEach(b=>{
