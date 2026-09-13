@@ -330,7 +330,9 @@
 
   .statusbar{
     background:#eee; border-top:1px solid #ccc; padding:4px 12px; font-size:18px; color:#555;
-    display:flex; justify-content:space-between;
+    display:none; justify-content:space-between;
+    /* 依需求隱藏最下面這一列，不佔畫面空間；文字內容還是照樣在背景更新，
+       只是不顯示出來，之後想要恢復顯示，把 display:none 拿掉就好 */
   }
 
   /* 說明區塊 */
