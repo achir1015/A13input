@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">A13照護</string>
+    <string name="title_activity_main">A13照護</string>
+    <string name="package_name">com.achir1015.a13care</string>
+    <string name="custom_url_scheme">com.achir1015.a13care</string>
+</resources>

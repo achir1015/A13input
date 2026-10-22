@@ -1,0 +1,18 @@
+{
+  "name": "a13-care",
+  "version": "1.0.0",
+  "description": "A13 病房照護紀錄作業 - 網頁版與 Android / iOS App（Capacitor 包裝）",
+  "private": true,
+  "scripts": {
+    "sync-web": "cp index.html www/index.html && cp index.html A13.html",
+    "sync": "npm run sync-web && npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+name: 打包 iOS（未簽署，驗證可編譯）
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'www/**', 'ios/**', 'capacitor.config.json', 'package.json']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: cp index.html www/index.html && npx cap sync ios
+      - name: 編譯（模擬器、不簽署）
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App \
+            -sdk iphonesimulator -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build

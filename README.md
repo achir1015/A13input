@@ -1,4 +1,39 @@
 # A13input  A13輸入資料 https://achir1015.github.io/A13input/
+
+## 📱 App 版本（Android / iPhone）
+
+本專案用 [Capacitor](https://capacitorjs.com/) 把網頁版「包成」原生 App（比喻：網頁是食物，App 是便當盒，內容同一份）。
+網頁檔案只有一份：`index.html`，三個平台共用。
+
+| 平台 | 資料夾 | 取得方式 |
+|---|---|---|
+| 網頁 | `index.html` | GitHub Pages |
+| Android | `android/` | Actions →「打包 Android APK」→ 下載 `A13-android-debug-apk` → 手機安裝 |
+| iPhone | `ios/` | 需 Mac + Xcode，開啟 `ios/App/App.xcworkspace` |
+
+### 更新網頁後，同步到 App
+```bash
+npm install          # 第一次
+npm run sync         # 把 index.html 複製到 www/ 並同步到 android、ios
+```
+
+### Android
+1. 到 GitHub 的 **Actions** 分頁，執行「打包 Android APK」，完成後下載 APK。
+2. 手機允許「安裝未知來源 App」後安裝即可。
+3. 要上架 Google Play 需改用簽署的 release 版本（`npx cap open android` 用 Android Studio 產生）。
+
+### iPhone
+1. 在 Mac 安裝 Xcode 與 CocoaPods，執行 `npm install && npx cap sync ios`。
+2. `npx cap open ios`，在 Signing 選你的 Apple ID / 開發者帳號，接上 iPhone 按執行。
+3. 免費 Apple ID 可自裝（7 天到期）；TestFlight / App Store 需 Apple Developer Program（US$99/年）。
+4. Actions 的「打包 iOS」只驗證能編譯，不產生可安裝檔（沒有簽署憑證）。
+
+### Firebase 注意事項
+App 內網址為 `localhost`（Android: https://localhost、iOS: capacitor://localhost）。
+若登入出現 unauthorized-domain，請到 Firebase Console → Authentication → Settings → 授權網域，確認有 `localhost`。
+
+---
+
 <img width="1917" height="946" alt="image" src="https://github.com/user-attachments/assets/e5299440-e08f-4349-ba0f-dee68b79cf09" />
 帳號： achir1962@gmail.com
 密碼： Aa123456

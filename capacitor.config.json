@@ -1,0 +1,7 @@
+{
+  "appId": "com.achir1015.a13care",
+  "appName": "A13照護",
+  "webDir": "www",
+  "backgroundColor": "#2f6f8f",
+  "server": { "androidScheme": "https" }
+}
