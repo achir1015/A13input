@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths: ['index.html', 'www/**', 'android/**', 'capacitor.config.json', 'package.json']
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,3 +22,11 @@ jobs:
         with:
           name: A13-android-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+      - name: 發佈到 Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk A13照護-android.apk
+          gh release create "android-v${{ github.run_number }}" A13照護-android.apk \
+            --title "A13照護 Android 版 #${{ github.run_number }}" \
+            --notes "Android 測試版 APK（debug 簽署）。手機下載後允許安裝未知來源即可安裝。"
