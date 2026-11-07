@@ -905,9 +905,9 @@ function buildTab5(){
     </div>`;
 
   const tableHtml = `<table class="iotable outputtable">
-      <thead><tr><th>尿</th><th>引流</th><th>屎</th><th>尿與屎</th><th></th></tr></thead>
+      <thead><tr><th>尿 U</th><th>引流</th><th>屎 S</th><th>尿與屎 US</th><th></th></tr></thead>
       <tbody id="outputTableBody"></tbody>
-      <tfoot><tr class="total"><td id="total_pee" data-label="尿合計">0</td><td id="total_drain" data-label="引流合計">0</td><td id="total_stool" data-label="屎合計">0</td><td id="total_mix" data-label="尿與屎合計">0</td><td></td></tr></tfoot>
+      <tfoot><tr class="total"><td id="total_pee" data-label="尿 U 合計">0</td><td id="total_drain" data-label="引流合計">0</td><td id="total_stool" data-label="屎 S 合計">0</td><td id="total_mix" data-label="尿與屎 US 合計">0</td><td></td></tr></tfoot>
     </table>
     <button type="button" class="addrow-btn" id="btnAddRow">＋ 新增一列紀錄</button>
     <button type="button" class="addrow-btn zero-btn" id="btnZeroOutput">⟲ 歸零（本格）</button>`;
@@ -1125,6 +1125,7 @@ function refreshAfterPatientListChange(){
   updateBedCountLabel();
   renderBedSelect();
   loadSlotIntoForm(getCurrentSlot());
+  subscribeSlot();
   document.getElementById('tab6').innerHTML = buildTab6();
   renderPatientList();
   renderPatientBar();
@@ -1339,11 +1340,10 @@ function buildStaticUI(){
   // 記憶體全部清空重來（這是手機作業系統本身的省電/省記憶體機制，網頁沒辦法完全擋掉）。
   // 為了不要因為這樣把使用者正在輸入、還沒按存檔的內容弄丟，這裡改成「停止輸入 1.5 秒
   // 就自動把目前這一格同步一次到雲端」，把可能遺失的範圍從「一整段編輯」縮小到「最後 1.5 秒」。
-  let autoDraftTimer = null;
   form.addEventListener('input', ()=>{
     clearTimeout(autoDraftTimer);
     autoDraftTimer = setTimeout(()=>{
-      if(!auth.currentUser) return; // 還沒登入就不用同步
+      if(!auth.currentUser || switching) return; // 還沒登入、或正在切換病床/班別時不要寫入
       const slot = getCurrentSlot();
       captureFormIntoSlot(slot);
       saveSlotToCloud(currentPatientIndex, currentShift, slot);
@@ -1370,6 +1370,7 @@ async function initAfterLogin(){
   renderBedSelect(); // 病床名單可能因為雲端資料而跟內建示範不一樣，下拉選單要重建
   updateBedCountLabel();
   loadSlotIntoForm(getCurrentSlot());
+  subscribeSlot(); // 開始即時監聽目前這一格
   document.getElementById('tab6').innerHTML = buildTab6(); // 用剛載入的組別分配資料重新畫一次表格
   renderPatientList();
   renderPatientBar();
@@ -1456,10 +1457,10 @@ let outputRowSeq = 0;
 function createOutputRow(idx){
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td data-label="尿"><input type="number" inputmode="numeric" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
+    <td data-label="尿 U"><input type="number" inputmode="numeric" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
     <td data-label="引流"><input type="number" inputmode="numeric" class="tbl-drain" name="c5_53_tbl_${idx}_drain"></td>
-    <td data-label="屎"><input type="number" inputmode="numeric" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
-    <td data-label="尿與屎"><input type="number" inputmode="numeric" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
+    <td data-label="屎 S"><input type="number" inputmode="numeric" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
+    <td data-label="尿與屎 US"><input type="number" inputmode="numeric" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
     <td class="delcell"><button type="button" class="delrow-btn" title="刪除此列">✕</button></td>`;
   return tr;
 }
@@ -1690,7 +1691,15 @@ function applyShiftColorTheme(){
 // 切換到「某一床＋某一班別」：先把目前畫面存回原本那一格（背景同步到雲端），
 // 再去雲端把新選到那一格的最新資料抓下來、載入畫面——這樣不管誰在哪支手機上改過，
 // 切過去看到的都是最新的，不會跳位、也不會看到舊資料。
+// 同步用的狀態：autoDraftTimer＝等待自動存檔的計時器；switching＝正在切換病床/班別（此時畫面還是舊資料，
+// 不可以把畫面內容寫進「新的那一格」，否則舊病人的資料會被帶到下一筆）。
+var autoDraftTimer = null;
+var switching = false;
+var unsubSlot = null;
+
 async function selectSlot(newPatientIndex, newShift){
+  clearTimeout(autoDraftTimer); // 取消還沒送出的自動存檔，避免它在切換後把舊畫面寫進新的一格
+  switching = true;
   const leavingPatientIndex = currentPatientIndex;
   const leavingShift = currentShift;
   const leavingSlot = getCurrentSlot();
@@ -1707,6 +1716,8 @@ async function selectSlot(newPatientIndex, newShift){
   renderPatientList();
   renderPatientBar();
   renderSlotStatus();
+  switching = false;
+  subscribeSlot();
   document.getElementById('statusLeft').textContent = '就緒';
 }
 
@@ -1936,6 +1947,7 @@ async function resetForm(){
 }
 
 async function saveRecord(){
+  if(switching) return;
   const slot = getCurrentSlot();
   captureFormIntoSlot(slot);
   slot.saved = true;
@@ -1959,22 +1971,132 @@ function slotDocId(patient, shift){
 
 // 把某一格（班別＋病人）的草稿或已存資料寫回 Firestore，失敗時只記錄，不擋住畫面操作
 // （本地的 patients[].slots 已經先更新過了，就算這次雲端同步失敗，資料也不會不見）
-async function saveSlotToCloud(patientIndex, shift, slot){
+// 同步原則（避免電腦、手機同時開同一筆時互相蓋掉）：
+//  1) 每一格記住「雲端目前的樣子」slot.base；寫入時只送出「跟 base 不一樣」的欄位（合併寫入），
+//     不再整份覆蓋——手機改 A 欄、電腦改 B 欄，兩邊都會保留。
+//  2) subscribeSlot() 即時監聽目前這一格，別的裝置改了就自動更新到畫面（正在輸入的欄位不動）。
+const isDefaultVal = v => v === '' || v === 'false' || v === undefined;
+function diffFields(cur, base){
+  const out = {};
+  Object.keys(cur).forEach(k=>{
+    if(cur[k] !== base[k] && !(base[k] === undefined && isDefaultVal(cur[k]))) out[k] = cur[k];
+  });
+  Object.keys(base).forEach(k=>{ if(!(k in cur)) out[k] = firebase.firestore.FieldValue.delete(); });
+  return out;
+}
+
+async function saveSlotToCloud(patientIndex, shift, slot, fullOverwrite){
   const p = patients[patientIndex];
   slot.updatedBy = auth.currentUser ? auth.currentUser.email : '';
   slot.updatedAt = new Date().toLocaleString('zh-TW',{hour12:false});
+  const cur = Object.assign({}, slot.fields||{});
+  const ref = db.collection(RECORDS_COLLECTION).doc(slotDocId(p, shift));
+  const meta = {
+    shift, bed: p.info.床號, name: p.info.姓名, gender: p.info.性別,
+    chartNo: p.info.病歷號, cardNo: p.info.卡號,
+    updatedBy: slot.updatedBy, updatedAt: slot.updatedAt
+  };
   try{
-    await db.collection(RECORDS_COLLECTION).doc(slotDocId(p, shift)).set({
-      shift, bed: p.info.床號, name: p.info.姓名, gender: p.info.性別,
-      chartNo: p.info.病歷號, cardNo: p.info.卡號,
-      date: slot.date||'', time: slot.time||'', saved: !!slot.saved,
-      updatedBy: slot.updatedBy, updatedAt: slot.updatedAt,
-      fields: slot.fields||{}
-    });
+    if(fullOverwrite || !slot.base){
+      await ref.set(Object.assign(meta,{ date:slot.date||'', time:slot.time||'', saved:!!slot.saved, fields:cur }));
+    } else {
+      const diff = diffFields(cur, slot.base);
+      const bm = slot.baseMeta || {};
+      const metaChanged = (slot.date||'')!==bm.date || (slot.time||'')!==bm.time || !!slot.saved!==!!bm.saved;
+      if(Object.keys(diff).length===0 && !metaChanged) return; // 沒有任何變更就不寫入，避免用舊畫面蓋掉別人的資料
+      const payload = Object.assign(meta,{ date:slot.date||'', time:slot.time||'', saved:!!slot.saved });
+      if(Object.keys(diff).length) payload.fields = diff;
+      await ref.set(payload, {merge:true});
+    }
+    slot.base = cur;
+    slot.baseMeta = { date:slot.date||'', time:slot.time||'', saved:!!slot.saved };
   }catch(err){
     console.error('寫入 Firestore 失敗：', err);
   }
 }
+
+// 5-3 / 5-5 表格各有哪幾列（從欄位名稱 c5_53_tbl_N_xxx 推出列編號）。
+// realOnly=true 時只算「有填過數字」的列：空白列沒存進雲端是正常的，不算列數不同。
+function rowSet(fields, realOnly){
+  const set = new Set();
+  Object.keys(fields).forEach(k=>{
+    const m = k.match(/^(c5_5[35])_tbl_(\d+)_/);
+    if(m && (!realOnly || !isDefaultVal(fields[k]))) set.add(m[1]+'_'+m[2]);
+  });
+  return set;
+}
+// 雲端新增了本機沒有的列、或雲端刪掉了本機還有（且有資料）的列，才需要整張表重建
+function rowsDiffer(merged, cur, base){
+  const mReal = rowSet(merged, true), c = rowSet(cur), bReal = rowSet(base, true), mAll = rowSet(merged);
+  for(const r of mReal) if(!c.has(r)) return true;
+  for(const r of bReal) if(c.has(r) && !mAll.has(r)) return true;
+  return false;
+}
+let pendingRemote = null;
+function subscribeSlot(){
+  if(unsubSlot){ unsubSlot(); unsubSlot = null; }
+  const p = patients[currentPatientIndex], shift = currentShift;
+  if(!p) return;
+  unsubSlot = db.collection(RECORDS_COLLECTION).doc(slotDocId(p, shift)).onSnapshot(snap=>{
+    if(!snap.exists || snap.metadata.hasPendingWrites) return;
+    if(switching || patients[currentPatientIndex] !== p || currentShift !== shift) return;
+    applyRemote(snap.data(), p, shift);
+  }, err=>console.error('即時監聽失敗：', err));
+}
+function applyRemote(d, p, shift){
+  const slot = p.slots[shift];
+  const remote = d.fields || {};
+  const cur = serializeForm();
+  const base = slot.base || {};
+  // 合併：本機「還沒送出的修改」保留，其餘一律採用雲端最新值
+  const merged = Object.assign({}, remote);
+  new Set([...Object.keys(cur), ...Object.keys(base)]).forEach(k=>{
+    if(cur[k] !== base[k] && !(base[k] === undefined && isDefaultVal(cur[k]))){
+      if(k in cur) merged[k] = cur[k]; else delete merged[k];
+    }
+  });
+  const ae = document.activeElement;
+  const editing = !!(ae && (form.contains(ae) || ae.id==='recDate' || ae.id==='recTime'));
+  const sameStruct = !rowsDiffer(merged, cur, base);
+  if(sameStruct){
+    Object.keys(merged).forEach(k=>{
+      const el = form.elements[k];
+      if(!el || el === ae || (el.length && el.contains && el.contains(ae))) return;
+      if(cur[k] !== merged[k]) setFieldValue(el, merged[k]);
+    });
+    const bm = slot.baseMeta || {};
+    ['recDate','recTime'].forEach(id=>{
+      const el = document.getElementById(id), key = id==='recDate'?'date':'time';
+      if(el !== ae && el.value === (bm[key]||'') && el.value !== (d[key]||'')) el.value = d[key]||'';
+    });
+    updateDependencies(); recalcTotals(); recalcFeedTotals();
+  } else if(!editing){
+    const ns = Object.assign({}, slot, { fields: merged, date: d.date||'', time: d.time||'' });
+    loadSlotIntoForm(ns);
+  } else {
+    pendingRemote = {d, p, shift}; // 正在輸入且列數不同：等離開欄位後再套用
+    return;
+  }
+  slot.base = Object.assign({}, remote);
+  slot.baseMeta = { date:d.date||'', time:d.time||'', saved:!!d.saved };
+  slot.saved = !!d.saved;
+  slot.updatedBy = d.updatedBy||''; slot.updatedAt = d.updatedAt||'';
+  renderSlotStatus();
+}
+// 新增／刪除表格列時瀏覽器不會觸發 input 事件，這裡補一個，讓列數變動也會自動同步到雲端
+document.addEventListener('click', e=>{
+  if(e.target.closest && e.target.closest('#btnAddRow, #btnAddFeedRow, .delrow-btn, .feed-delrow-btn')){
+    setTimeout(()=>form.dispatchEvent(new Event('input', {bubbles:true})), 300);
+  }
+});
+document.addEventListener('focusout', ()=>{
+  setTimeout(()=>{
+    if(pendingRemote && !(document.activeElement && form.contains(document.activeElement))){
+      const {d,p,shift} = pendingRemote; pendingRemote = null;
+      if(patients[currentPatientIndex]===p && currentShift===shift) applyRemote(d,p,shift);
+    }
+  }, 200);
+});
 
 // 讀取某一格（班別＋病人）在雲端的最新資料；讀不到（尚未有人存過或離線）就退回本地快取
 async function loadSlotFromCloud(patientIndex, shift){
@@ -1985,7 +2107,8 @@ async function loadSlotFromCloud(patientIndex, shift){
       const d = snap.data();
       const slot = {
         fields: d.fields||{}, date: d.date||'', time: d.time||'',
-        saved: !!d.saved, savedAt: '', updatedBy: d.updatedBy||'', updatedAt: d.updatedAt||''
+        saved: !!d.saved, savedAt: '', updatedBy: d.updatedBy||'', updatedAt: d.updatedAt||'',
+        base: Object.assign({}, d.fields||{}), baseMeta: { date:d.date||'', time:d.time||'', saved:!!d.saved }
       };
       p.slots[shift] = slot;
       return slot;
@@ -2007,7 +2130,8 @@ async function loadAllSlotsFromCloud(){
       if(!patient) return; // 目前病床清單找不到對應病人就略過
       patient.slots[d.shift] = {
         fields: d.fields||{}, date: d.date||'', time: d.time||'',
-        saved: !!d.saved, savedAt: '', updatedBy: d.updatedBy||'', updatedAt: d.updatedAt||''
+        saved: !!d.saved, savedAt: '', updatedBy: d.updatedBy||'', updatedAt: d.updatedAt||'',
+        base: Object.assign({}, d.fields||{}), baseMeta: { date:d.date||'', time:d.time||'', saved:!!d.saved }
       };
     });
   }catch(err){
@@ -2126,7 +2250,7 @@ async function importXml(text){
       updatedAt: rEl.getAttribute('最後更新時間') || ''
     };
     patient.slots[shift] = slot;
-    writes.push(saveSlotToCloud(patients.indexOf(patient), shift, slot));
+    writes.push(saveSlotToCloud(patients.indexOf(patient), shift, slot, true));
   });
 
   await Promise.all(writes);
