@@ -475,14 +475,11 @@
 
 <!-- 登入畫面：沒登入之前蓋住整個畫面，登入成功才會顯示下面的系統本體 -->
 <div id="loginOverlay" class="login-overlay">
-  <form id="loginForm" class="login-box">
+  <div class="login-box">
     <h2>A13 照護紀錄系統</h2>
-    <p class="login-sub">請先登入院內帳號才能使用</p>
-    <input type="email" id="loginEmail" placeholder="帳號 (Email)" autocomplete="username" required>
-    <input type="password" id="loginPassword" placeholder="密碼" autocomplete="current-password" required>
-    <button type="submit" id="btnLogin">登入</button>
+    <p class="login-sub" id="loginSub">連線中，請稍候…</p>
     <div id="loginError" class="login-error"></div>
-  </form>
+  </div>
 </div>
 
 <div class="app" id="appRoot" style="display:none;">
@@ -499,9 +496,7 @@
     <button id="btnExport">⬇ 匯出</button>
     <button id="btnImport">⬆ 匯入</button>
     <input type="file" id="fileImport" accept=".xml" style="display:none">
-    <div class="sep"></div>
-    <button id="btnLogout">🚪 登出</button>
-    <span class="note">資料已改為儲存在雲端 Firestore，登入的院內帳號都能即時共用。</span>
+    <span class="note">資料儲存在雲端 Firestore，所有裝置即時共用。</span>
   </div>
 
   <!-- 手機版專用：班別按鈕＋病床下拉會被 JS 搬到這裡，固定顯示在最上方；桌機維持在左側欄 -->
@@ -658,21 +653,19 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const RECORDS_COLLECTION = 'a13records';
 
-/* ---------- 登入 / 登出 ---------- */
-document.getElementById('loginForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim();
-  const pw = document.getElementById('loginPassword').value;
-  const errBox = document.getElementById('loginError');
-  errBox.textContent = '';
-  auth.signInWithEmailAndPassword(email, pw).catch(err=>{
-    errBox.textContent = '登入失敗：帳號或密碼不正確，請再試一次。';
+/* ---------- 免登入：自動以「匿名身分」連線 ----------
+   不需要帳號密碼，開啟網頁／App 就直接進入。Firebase 匿名登入會在背景自動完成，
+   Firestore 規則仍是「已驗證才可讀寫」，所以需要在 Firebase Console 啟用「匿名」登入方式。 */
+function connectAnonymously(){
+  auth.signInAnonymously().catch(err=>{
     console.error(err);
+    document.getElementById('loginSub').textContent = '無法連線到雲端';
+    document.getElementById('loginError').textContent =
+      (err.code==='auth/operation-not-allowed')
+        ? '尚未在 Firebase 啟用「匿名」登入：Console → Authentication → Sign-in method → 匿名 → 啟用。'
+        : '連線失敗，請檢查網路後重新開啟。（' + (err.code||err.message) + '）';
   });
-});
-document.getElementById('btnLogout').addEventListener('click', ()=>{
-  if(confirm('確定要登出嗎？')) auth.signOut();
-});
+}
 
 // 只要登入狀態改變（登入成功／登出）就會觸發這裡：
 // 登入 -> 顯示系統本體、去雲端載入 93 格資料；登出 -> 蓋回登入畫面
@@ -683,7 +676,7 @@ auth.onAuthStateChanged(user=>{
   if(user){
     loginOverlay.style.display = 'none';
     appRoot.style.display = 'flex';
-    document.getElementById('loginInfo').textContent = `已登入：${user.email}`;
+    document.getElementById('loginInfo').textContent = '已連線';
     // Firebase 有時候會用同一個帳號重複觸發這個事件（例如背景分頁重新取得焦點、
     // Token 背景刷新等），如果帳號沒變就不要重跑 initAfterLogin，
     // 不然會把使用者正在編輯、還沒存檔的內容整個重新載入蓋掉。
@@ -695,7 +688,7 @@ auth.onAuthStateChanged(user=>{
     loggedInUid = null;
     appRoot.style.display = 'none';
     loginOverlay.style.display = 'flex';
-    document.getElementById('loginPassword').value = '';
+    connectAnonymously(); // 沒有身分就自動以匿名連線
   }
 });
 </script>
@@ -1019,7 +1012,7 @@ async function saveGroupAssignments(){
   const statusEl = document.getElementById('groupStatus');
   if(statusEl) statusEl.textContent = '同步中...';
   try{
-    const updatedBy = auth.currentUser ? auth.currentUser.email : '';
+    const updatedBy = auth.currentUser ? '訪客' : '';
     const updatedAt = new Date().toLocaleString('zh-TW',{hour12:false});
     await db.collection('a13groupassignment').doc('main').set({
       assignments: groupAssignments, updatedBy, updatedAt
@@ -1942,7 +1935,7 @@ function slotDocId(patient, shift){
 // （本地的 patients[].slots 已經先更新過了，就算這次雲端同步失敗，資料也不會不見）
 async function saveSlotToCloud(patientIndex, shift, slot){
   const p = patients[patientIndex];
-  slot.updatedBy = auth.currentUser ? auth.currentUser.email : '';
+  slot.updatedBy = auth.currentUser ? '訪客' : '';
   slot.updatedAt = new Date().toLocaleString('zh-TW',{hour12:false});
   try{
     await db.collection(RECORDS_COLLECTION).doc(slotDocId(p, shift)).set({

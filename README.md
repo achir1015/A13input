@@ -35,8 +35,6 @@ App 內網址為 `localhost`（Android: https://localhost、iOS: capacitor://loc
 ---
 
 <img width="1917" height="946" alt="image" src="https://github.com/user-attachments/assets/e5299440-e08f-4349-ba0f-dee68b79cf09" />
-帳號： achir1962@gmail.com
-密碼： Aa123456
 
 A13 照護紀錄系統 — 功能總結
 
