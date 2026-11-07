@@ -1497,8 +1497,26 @@ function recalcTotals(){
   });
 }
 
+/* 表格數字欄位的輸入保護：
+   1) 點進欄位時整格選取，直接輸入就是取代，不會接在舊數字後面；
+   2) 離開欄位時把「01200」「0400」這類前面多餘的 0 去掉；0 就顯示成空白。 */
+document.addEventListener('focusin', e=>{
+  if(e.target.matches && e.target.matches('#outputTableBody input, #feedTableBody input.feed-milk, #feedTableBody input[type=number]')) setTimeout(()=>{ try{ e.target.select(); }catch(_){} }, 0);
+});
+document.addEventListener('focusout', e=>{
+  const el = e.target;
+  if(!(el.matches && el.matches('#outputTableBody input, #feedTableBody input[type=number]'))) return;
+  if(el.value === '') return;
+  const n = Number(el.value);
+  const clean = (isFinite(n) && n !== 0) ? String(n) : '';
+  if(clean !== el.value){
+    el.value = clean;
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+  }
+});
+
 // 「歸零」：把目前這一格（班別＋床號＋姓名＋照顧紀錄日期，也就是現在畫面上看到的這一格）
-// 的尿／引流／屎／尿與屎表格，所有已輸入的數值都設回 0（不刪列，只是把數字清空），
+// 的尿／引流／屎／尿與屎表格，所有已輸入的數值都清成空白＝0（不刪列，合計會變 0），
 // 並且立刻同步存回雲端，避免歸零之後忘記按存檔、其他裝置看到的還是舊數字。
 async function zeroOutputTable(){
   const p = patients[currentPatientIndex].info;
@@ -1508,7 +1526,8 @@ async function zeroOutputTable(){
     `確定要將「${currentShift}．${p.床號} ${p.姓名}．${dateStr} ${timeStr}」這一格的\n尿／引流／屎／尿與屎 數值全部歸零嗎？（會同步清空雲端資料）`
   );
   if(!ok) return;
-  document.querySelectorAll('#outputTableBody input').forEach(inp=>{ inp.value = 0; });
+  // 歸零後欄位清成「空白」而不是顯示 0：避免游標在 0 前面輸入時變成 01200 之類的十倍錯誤
+  document.querySelectorAll('#outputTableBody input').forEach(inp=>{ inp.value = ''; });
   recalcTotals();
   const slot = getCurrentSlot();
   captureFormIntoSlot(slot);
