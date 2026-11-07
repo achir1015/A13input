@@ -1592,7 +1592,7 @@ function deleteFeedRow(trEl){
   }
   trEl.remove();
   updateFeedGrandTotalCell();
-  recalcFeedTotals();
+  recalcFeedTotals(true);
 }
 
 // 把「小計」那個合併儲存格，重新放到目前排在第一列的資料列上，
@@ -1612,7 +1612,9 @@ function updateFeedGrandTotalCell(){
   recalcFeedTotals();
 }
 
-function recalcFeedTotals(){
+// autoFill=true（使用者輸入／刪列時）：把餵食表的「小計」自動帶入 5-3「輸入量：液體」欄位；
+// 讀取舊紀錄時不帶入，避免蓋掉原本存的值。
+function recalcFeedTotals(autoFill){
   let grand = 0;
   FEED_COLS.forEach(c=>{
     let sum = 0;
@@ -1626,10 +1628,14 @@ function recalcFeedTotals(){
   // 手機卡片版沒有跨列合併格，改把小計顯示在合計卡片裡（桌機版看不到這個格子的內容）
   const gm = document.getElementById('feedGrandMobile');
   if(gm) gm.dataset.grand = grand;
+  if(autoFill){
+    const liquid = document.querySelector('input[name="c5_53_liquid"]');
+    if(liquid) liquid.value = grand ? String(grand) : '';
+  }
 }
 
 document.addEventListener('input', (e)=>{
-  if(e.target.matches('#feedTableBody input')) recalcFeedTotals();
+  if(e.target.matches('#feedTableBody input')) recalcFeedTotals(true);
 });
 document.addEventListener('click', (e)=>{
   if(e.target.id === 'btnAddFeedRow') addFeedRow();
