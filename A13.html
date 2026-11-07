@@ -653,17 +653,18 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const RECORDS_COLLECTION = 'a13records';
 
-/* ---------- 免登入：自動以「匿名身分」連線 ----------
-   不需要帳號密碼，開啟網頁／App 就直接進入。Firebase 匿名登入會在背景自動完成，
-   Firestore 規則仍是「已驗證才可讀寫」，所以需要在 Firebase Console 啟用「匿名」登入方式。 */
+/* ---------- 免登入：程式內建共用帳號，開啟就自動登入 ----------
+   使用者不用輸入帳號密碼。帳號是 Firebase Authentication 裡已建立的 Email/密碼使用者，
+   Firestore 規則仍是「已驗證才可讀寫」。（注意：這些文字會公開在網頁原始碼裡，
+   等於知道網址的人都能進入；若要改回需要輸入，把這段改回登入表單即可。） */
+const AUTO_LOGIN_EMAIL = 'achir1962@gmail.com';
+const AUTO_LOGIN_PASSWORD = 'Aa123456';
 function connectAnonymously(){
-  auth.signInAnonymously().catch(err=>{
+  auth.signInWithEmailAndPassword(AUTO_LOGIN_EMAIL, AUTO_LOGIN_PASSWORD).catch(err=>{
     console.error(err);
     document.getElementById('loginSub').textContent = '無法連線到雲端';
     document.getElementById('loginError').textContent =
-      (err.code==='auth/operation-not-allowed')
-        ? '尚未在 Firebase 啟用「匿名」登入：Console → Authentication → Sign-in method → 匿名 → 啟用。'
-        : '連線失敗，請檢查網路後重新開啟。（' + (err.code||err.message) + '）';
+      '自動登入失敗，請檢查網路，或確認 Firebase 內此帳號仍存在。（' + (err.code||err.message) + '）';
   });
 }
 
@@ -688,7 +689,7 @@ auth.onAuthStateChanged(user=>{
     loggedInUid = null;
     appRoot.style.display = 'none';
     loginOverlay.style.display = 'flex';
-    connectAnonymously(); // 沒有身分就自動以匿名連線
+    connectAnonymously(); // 沒有身分就用內建帳號自動登入
   }
 });
 </script>
@@ -1012,7 +1013,7 @@ async function saveGroupAssignments(){
   const statusEl = document.getElementById('groupStatus');
   if(statusEl) statusEl.textContent = '同步中...';
   try{
-    const updatedBy = auth.currentUser ? '訪客' : '';
+    const updatedBy = auth.currentUser ? auth.currentUser.email : '';
     const updatedAt = new Date().toLocaleString('zh-TW',{hour12:false});
     await db.collection('a13groupassignment').doc('main').set({
       assignments: groupAssignments, updatedBy, updatedAt
@@ -1960,7 +1961,7 @@ function slotDocId(patient, shift){
 // （本地的 patients[].slots 已經先更新過了，就算這次雲端同步失敗，資料也不會不見）
 async function saveSlotToCloud(patientIndex, shift, slot){
   const p = patients[patientIndex];
-  slot.updatedBy = auth.currentUser ? '訪客' : '';
+  slot.updatedBy = auth.currentUser ? auth.currentUser.email : '';
   slot.updatedAt = new Date().toLocaleString('zh-TW',{hour12:false});
   try{
     await db.collection(RECORDS_COLLECTION).doc(slotDocId(p, shift)).set({
