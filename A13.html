@@ -391,6 +391,47 @@
     .delrow-btn, .feed-delrow-btn{ width:32px; height:32px; font-size:22px; }
 
     .statusbar{ font-size:16px; flex-wrap:wrap; gap:2px 8px; }
+
+    /* ====== 手機直列版：表格改成「一筆一張卡片」由上往下排 ======
+       比喻：桌機像 Excel 的一整排格子，手機像名片盒，每筆資料抽成一張名片，
+       不需要左右捲動。純 CSS，資料結構與欄位 name 完全不變。 */
+    table.outputtable, table.feedtable{ max-width:none; border-collapse:separate; }
+    table.outputtable thead, table.feedtable thead{ display:none; }
+    table.outputtable, table.outputtable tbody, table.outputtable tfoot, table.outputtable tr, table.outputtable td,
+    table.feedtable, table.feedtable tbody, table.feedtable tr, table.feedtable td{ display:block; width:100%; box-sizing:border-box; }
+    table.outputtable tbody, table.feedtable tbody{ counter-reset:rec; }
+    table.outputtable tbody tr, table.feedtable tr.feed-row{
+      counter-increment:rec; position:relative;
+      border:1px solid #7fc9c9; border-radius:10px; background:#fff;
+      margin:10px 0; padding:8px 10px 6px;
+    }
+    table.outputtable tbody tr::before, table.feedtable tr.feed-row::before{
+      content:"第 " counter(rec) " 筆"; display:block; font-weight:bold; color:#2f7f7d; margin-bottom:4px;
+    }
+    table.outputtable td, table.feedtable td{ border:none; padding:4px 0; text-align:left; }
+    table.outputtable tbody td[data-label], table.feedtable tr.feed-row td[data-label]{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    table.outputtable td[data-label]::before, table.feedtable td[data-label]::before{
+      content:attr(data-label); font-size:20px; color:#2f7f7d; font-weight:bold; flex:0 0 auto;
+    }
+    table.outputtable td input, table.feedtable td input{ flex:1 1 auto; width:60%; min-width:0; max-width:240px; }
+    td.delcell{ position:absolute; top:6px; right:8px; width:auto !important; padding:0 !important; }
+    /* 合計卡片 */
+    table.outputtable tfoot tr, table.feedtable tr.total{
+      border:1px solid #6fb36f; border-radius:10px; background:#bfe6bf; margin:10px 0; padding:8px 10px;
+    }
+    table.feedtable tr.total{ background:#ffdca0; border-color:#d9a441; }
+    table.outputtable tfoot td[data-label], table.feedtable tr.total td[data-label]{
+      display:flex; justify-content:space-between; background:transparent; font-size:22px;
+    }
+    table.outputtable tfoot td:empty, table.feedtable tr.total td:empty{ display:none; }
+    table.feedtable .feed-grandtotal{ display:none; }
+    table.feedtable tr.total td.m-grand{
+      display:flex; justify-content:space-between; background:#fff44f; border-radius:6px; padding:6px 8px; margin-top:6px; font-size:24px;
+    }
+    table.feedtable tr.total td.m-grand::after{ content:attr(data-grand); font-weight:bold; }
+    table.outputtable tfoot td[data-label]::before, table.feedtable tr.total td[data-label]::before{ font-size:18px; }
   }
 </style>
 </head>
@@ -829,7 +870,7 @@ function buildTab5(){
   const tableHtml = `<table class="iotable outputtable">
       <thead><tr><th>尿</th><th>引流</th><th>屎</th><th>尿與屎</th><th></th></tr></thead>
       <tbody id="outputTableBody"></tbody>
-      <tfoot><tr class="total"><td id="total_pee">0</td><td id="total_drain">0</td><td id="total_stool">0</td><td id="total_mix">0</td><td></td></tr></tfoot>
+      <tfoot><tr class="total"><td id="total_pee" data-label="尿合計">0</td><td id="total_drain" data-label="引流合計">0</td><td id="total_stool" data-label="屎合計">0</td><td id="total_mix" data-label="尿與屎合計">0</td><td></td></tr></tfoot>
     </table>
     <button type="button" class="addrow-btn" id="btnAddRow">＋ 新增一列紀錄</button>
     <button type="button" class="addrow-btn zero-btn" id="btnZeroOutput">⟲ 歸零（本格）</button>`;
@@ -843,13 +884,13 @@ function buildTab5(){
       </tr></thead>
       <tbody id="feedTableBody">
         <tr class="total" id="feedTotalRow">
-          <td id="total_feed_milk">0</td>
-          <td id="total_feed_water1">0</td>
-          <td id="total_feed_protein">0</td>
-          <td id="total_feed_medwater">0</td>
-          <td id="total_feed_water2">0</td>
-          <td id="total_feed_other">0</td>
-          <td></td><td></td><td></td>
+          <td id="total_feed_milk" data-label="餵食奶合計">0</td>
+          <td id="total_feed_water1" data-label="餵食水合計">0</td>
+          <td id="total_feed_protein" data-label="餵食高蛋白合計">0</td>
+          <td id="total_feed_medwater" data-label="藥+水合計">0</td>
+          <td id="total_feed_water2" data-label="餵水合計">0</td>
+          <td id="total_feed_other" data-label="其他餵食合計">0</td>
+          <td></td><td id="feedGrandMobile" class="m-grand" data-label="小計（全部加總）"></td><td></td>
         </tr>
       </tbody>
     </table>
@@ -1342,11 +1383,11 @@ let outputRowSeq = 0;
 function createOutputRow(idx){
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="number" inputmode="numeric" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
-    <td><input type="number" inputmode="numeric" class="tbl-drain" name="c5_53_tbl_${idx}_drain"></td>
-    <td><input type="number" inputmode="numeric" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
-    <td><input type="number" inputmode="numeric" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
-    <td><button type="button" class="delrow-btn" title="刪除此列">✕</button></td>`;
+    <td data-label="尿"><input type="number" inputmode="numeric" class="tbl-pee" name="c5_53_tbl_${idx}_pee"></td>
+    <td data-label="引流"><input type="number" inputmode="numeric" class="tbl-drain" name="c5_53_tbl_${idx}_drain"></td>
+    <td data-label="屎"><input type="number" inputmode="numeric" class="tbl-stool" name="c5_53_tbl_${idx}_stool"></td>
+    <td data-label="尿與屎"><input type="number" inputmode="numeric" class="tbl-mix" name="c5_53_tbl_${idx}_mix"></td>
+    <td class="delcell"><button type="button" class="delrow-btn" title="刪除此列">✕</button></td>`;
   return tr;
 }
 
@@ -1425,14 +1466,14 @@ function createFeedRow(idx){
   const tr = document.createElement('tr');
   tr.className = 'feed-row';
   tr.innerHTML = `
-    <td><input type="number" inputmode="numeric" class="feed-milk" name="c5_55_tbl_${idx}_milk"></td>
-    <td><input type="number" inputmode="numeric" class="feed-water1" name="c5_55_tbl_${idx}_water1"></td>
-    <td><input type="number" inputmode="numeric" class="feed-protein" name="c5_55_tbl_${idx}_protein"></td>
-    <td><input type="number" inputmode="numeric" class="feed-medwater" name="c5_55_tbl_${idx}_medwater"></td>
-    <td><input type="number" inputmode="numeric" class="feed-water2" name="c5_55_tbl_${idx}_water2"></td>
-    <td><input type="number" inputmode="numeric" class="feed-other" name="c5_55_tbl_${idx}_other"></td>
-    <td><input type="text" class="feed-time f-time" name="c5_55_tbl_${idx}_time" placeholder="HH:MM" inputmode="numeric" maxlength="5"></td>
-    <td><button type="button" class="feed-delrow-btn" title="刪除此列">✕</button></td>`;
+    <td data-label="餵食奶"><input type="number" inputmode="numeric" class="feed-milk" name="c5_55_tbl_${idx}_milk"></td>
+    <td data-label="餵食水"><input type="number" inputmode="numeric" class="feed-water1" name="c5_55_tbl_${idx}_water1"></td>
+    <td data-label="餵食高蛋白"><input type="number" inputmode="numeric" class="feed-protein" name="c5_55_tbl_${idx}_protein"></td>
+    <td data-label="藥+水"><input type="number" inputmode="numeric" class="feed-medwater" name="c5_55_tbl_${idx}_medwater"></td>
+    <td data-label="餵水"><input type="number" inputmode="numeric" class="feed-water2" name="c5_55_tbl_${idx}_water2"></td>
+    <td data-label="其他餵食"><input type="number" inputmode="numeric" class="feed-other" name="c5_55_tbl_${idx}_other"></td>
+    <td data-label="時間"><input type="text" class="feed-time f-time" name="c5_55_tbl_${idx}_time" placeholder="HH:MM" inputmode="numeric" maxlength="5"></td>
+    <td class="delcell"><button type="button" class="feed-delrow-btn" title="刪除此列">✕</button></td>`;
   return tr;
 }
 
@@ -1491,6 +1532,9 @@ function recalcFeedTotals(){
   });
   const gt = document.getElementById('feedGrandTotal');
   if(gt) gt.textContent = grand;
+  // 手機卡片版沒有跨列合併格，改把小計顯示在合計卡片裡（桌機版看不到這個格子的內容）
+  const gm = document.getElementById('feedGrandMobile');
+  if(gm) gm.dataset.grand = grand;
 }
 
 document.addEventListener('input', (e)=>{
