@@ -1484,19 +1484,36 @@ function deleteTableRow(trEl){
     return;
   }
   trEl.remove();
-  recalcTotals();
+  recalcTotals(true);
 }
 
 document.addEventListener('input', (e)=>{
-  if(e.target.matches('#outputTableBody input')) recalcTotals();
+  if(e.target.matches('#outputTableBody input')) recalcTotals(true);
 });
-function recalcTotals(){
+// autoFill=true（使用者輸入／刪列／歸零時）：把表格加總自動帶入 5-3 上方的輸出量欄位；
+// 讀取舊紀錄時不帶入，避免蓋掉原本存的值。
+//   尿合計   → 尿液(cc)         引流合計 → 引流量(cc)
+//   屎合計   → 排便(gm)，排便「次數」＝屎欄位有填數字（>0）的筆數
+//   尿與屎合計 → 其他：「N次 US:合計cc」（N＝尿與屎欄位有填數字的筆數）
+function recalcTotals(autoFill){
   const cols = ['pee','drain','stool','mix'];
+  const sums = {}, counts = {};
   cols.forEach(c=>{
-    let sum = 0;
-    document.querySelectorAll(`.tbl-${c}`).forEach(inp=>{ sum += Number(inp.value)||0; });
+    let sum = 0, cnt = 0;
+    document.querySelectorAll(`.tbl-${c}`).forEach(inp=>{
+      const n = Number(inp.value)||0; sum += n; if(n > 0) cnt++;
+    });
+    sums[c] = sum; counts[c] = cnt;
     document.getElementById(`total_${c}`).textContent = sum;
   });
+  if(autoFill){
+    const put = (name, v)=>{ const el = form.elements[name]; if(el) el.value = v; };
+    put('c5_53_urine', sums.pee ? String(sums.pee) : '');
+    put('c5_53_drain', sums.drain ? String(sums.drain) : '');
+    put('c5_53_stoolweight', sums.stool ? String(sums.stool) : '');
+    put('c5_53_stoolcount', counts.stool ? String(counts.stool) : '');
+    put('c5_53_other', sums.mix ? `${counts.mix}次 US:${sums.mix}cc` : '');
+  }
 }
 
 /* 表格數字欄位的輸入保護：
@@ -1530,7 +1547,7 @@ async function zeroOutputTable(){
   if(!ok) return;
   // 歸零後欄位清成「空白」而不是顯示 0：避免游標在 0 前面輸入時變成 01200 之類的十倍錯誤
   document.querySelectorAll('#outputTableBody input').forEach(inp=>{ inp.value = ''; });
-  recalcTotals();
+  recalcTotals(true);
   const slot = getCurrentSlot();
   captureFormIntoSlot(slot);
   await saveSlotToCloud(currentPatientIndex, currentShift, slot);
@@ -1542,7 +1559,7 @@ async function zeroOutputTable(){
 // 綁定新增列／刪除列／歸零按鈕（buildTab5 用 innerHTML 產生，需在 init 之後綁定，
 // 用事件委派最簡單）
 document.addEventListener('click', (e)=>{
-  if(e.target.id === 'btnAddRow'){ addTableRow(); recalcTotals(); }
+  if(e.target.id === 'btnAddRow'){ addTableRow(); recalcTotals(true); }
   if(e.target.classList.contains('delrow-btn')){ deleteTableRow(e.target.closest('tr')); }
   if(e.target.id === 'btnZeroOutput'){ zeroOutputTable(); }
 });
