@@ -145,6 +145,10 @@
     display:flex; flex-wrap:wrap; gap:14px; font-size:20px; color:#333;
   }
   .patientbar.collapsed{ display:none; }
+  .pb-summary{ display:none; flex:1; min-width:0; padding:6px 8px; font-size:18px; line-height:1.3; }
+  .patientbar.collapsed + .pb-summary{ display:block; }
+  .pb-summary .pb-dx{ color:#666; font-size:15px; }
+  .mobile-top{ display:none; }
   .patientbar b{ color:#000; }
 
   .body-wrap{ flex:1; display:flex; overflow:hidden; min-height:0; }
@@ -260,6 +264,8 @@
     border:1px solid #aaa; border-radius:3px; padding:6px 9px; font-size:2em;
   }
   .unit{ margin:0 6px 0 2px; color:var(--grey-text); font-size:18px; }
+  .toggle-btn.banned{ opacity:.4; text-decoration:line-through; }
+  .toggle-btn.banned input:checked + span{ background:#e05a5a; color:#fff; }
   .pos-pair{ display:inline-flex; align-items:center; gap:2px; margin-right:16px; }
 
   table.iotable{ border-collapse:collapse; margin-top:6px; width:100%; max-width:600px; }
@@ -432,6 +438,32 @@
     }
     table.feedtable tr.total td.m-grand::after{ content:attr(data-grand); font-weight:bold; }
     table.outputtable tfoot td[data-label]::before, table.feedtable tr.total td[data-label]::before{ font-size:18px; }
+
+    /* ====== 手機直列版：上方固定列、分頁一列、欄位一筆一行 ====== */
+    .mobile-top{ display:block; background:#2f6f8f; }
+    .mobile-top .shifttabs{ padding:4px 6px 2px; }
+    .mobile-top .shifttabs button{ padding:6px 4px; font-size:20px; }
+    .mobile-top .shead{ background:#2f6f8f; border:none; padding:2px 6px 6px; }
+    .mobile-top .shead-title{ display:none; }
+    .mobile-top .bed-select{ font-size:22px; padding:4px; }
+    .mobile-top .bed-nav .nav-btn{ padding:6px 14px; }
+    .recorddate{ font-size:16px; padding:4px 8px; gap:4px 6px; }
+    .recorddate .cardno{ font-size:1.5em; }
+    #lblCardNo{ display:none; }
+    .tabs{ overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; }
+    .tabs button{ flex:0 0 auto; min-height:0; padding:8px 12px; font-size:17px; white-space:nowrap; }
+    .tabs button br{ display:none; }
+    .patientbar-wrap .toggle-patientbar-btn{ margin:4px; }
+
+    /* 每一筆（一列 .row）獨立成一行區塊：主項目一行、按鈕一行、細項一行 */
+    #careForm .row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px;
+      padding:8px 0; border-bottom:1px dashed #b9d9b9; }
+    #careForm .row > .chk:first-child, #careForm .row > .lbl:first-child{ flex:0 0 100%; margin-right:0; }
+    #careForm .row .subs{ flex:0 0 100%; }
+    #careForm .pos-pair{ flex:0 0 100%; display:flex; align-items:center; gap:6px; margin-right:0; }
+    #tab4 input.f-time{ width:110px; font-size:1.3em; }
+    .toggle-btn span{ white-space:nowrap; padding:6px 12px; }
+    .ban-row .chk{ flex:0 0 auto; }
   }
 </style>
 </head>
@@ -468,6 +500,9 @@
     <span class="note">資料已改為儲存在雲端 Firestore，登入的院內帳號都能即時共用。</span>
   </div>
 
+  <!-- 手機版專用：班別按鈕＋病床下拉會被 JS 搬到這裡，固定顯示在最上方；桌機維持在左側欄 -->
+  <div class="mobile-top" id="mobileTop"></div>
+
   <div class="recorddate">
     <span id="lblRecordDate">記錄日期</span>
     <input type="date" id="recDate">
@@ -481,6 +516,7 @@
   <div class="patientbar-wrap">
     <button type="button" id="btnTogglePatientbar" class="toggle-patientbar-btn" title="顯示/隱藏病人資訊">▾</button>
     <div class="patientbar" id="patientbar"><!-- 由 JS 產生 --></div>
+    <div class="pb-summary" id="pbSummary"></div>
   </div>
 
   <div class="body-wrap">
@@ -494,7 +530,7 @@
         <button data-shift="小夜">小夜</button>
         <button data-shift="大夜">大夜</button>
       </div>
-      <div class="shead">
+      <div class="shead" id="shead">
         <span class="shead-title" id="shead-title">病人清單（31 床）</span>
         <div class="bed-nav">
           <button type="button" id="btnPrevBed" class="nav-btn" title="上一床">▲</button>
@@ -776,7 +812,7 @@ function positionRows(id, rowsCount, pairsPerRow, tabooId){
       const idx = r*pairsPerRow+p;
       pairs += `<span class="pos-pair">${timeInput(`${id}_r${idx}_time`)} ${radioGroup(`${id}_r${idx}_pos`,['左側','右側','平躺'],['left','right','lying'])}</span>`;
     }
-    const taboo = (r===0) ? `<span class="lbl">禁忌</span>${textInput(tabooId,'',null,300)}` : '';
+    const taboo = (tabooId && r===0) ? `<span class="lbl">其他禁忌</span>${textInput(tabooId,'',null,300)}` : '';
     out += `<div class="row">${pairs}${taboo}</div>`;
   }
   return out;
@@ -832,7 +868,10 @@ function buildTab3(){
 function buildTab4(){
   return [
     group('4-1','翻身/拍背',
-      positionRows('c4_41', 2, 2, 'c4_41_taboo') +
+      // 禁翻身方向：勾選後，下面對應方向的按鈕會變灰、劃線，避免手滑選到被禁止的姿勢
+      `<div class="row ban-row"><span class="lbl">禁翻身方向</span>${cb('c4_41_ban_left','禁左翻身')}${cb('c4_41_ban_lying','禁平躺')}${cb('c4_41_ban_right','禁右翻身')}</div>` +
+      `<div class="row"><span class="lbl">其他禁忌</span>${textInput('c4_41_taboo','',null,300)}</div>` +
+      positionRows('c4_41', 2, 2, null) +
       multiToggleRow('c4_41_obs','觀察皮膚情形',[['c4_41_broken','破皮'],['c4_41_rash','紅疹'],['c4_41_smell','異味']]) +
       checkRow([['c4_41_pat','執行拍背']])
     ),
@@ -1269,6 +1308,22 @@ function buildStaticUI(){
     document.getElementById('btnToggleHistory').textContent = collapsed ? '▸' : '▾';
   });
 
+  // 手機：班別按鈕＋病床下拉搬到最上方固定列；病人資訊預設收起，點 ▸ 才展開
+  const mq = window.matchMedia('(max-width:820px)');
+  function placeNav(){
+    const mt = document.getElementById('mobileTop');
+    const sb = document.querySelector('.sidebar');
+    const tabsEl = document.getElementById('shiftTabs'), sh = document.getElementById('shead');
+    if(mq.matches){ mt.appendChild(tabsEl); mt.appendChild(sh); }
+    else { sb.insertBefore(sh, sb.firstChild); sb.insertBefore(tabsEl, sb.firstChild); }
+  }
+  placeNav();
+  if(mq.addEventListener) mq.addEventListener('change', placeNav);
+  if(mq.matches){
+    document.getElementById('patientbar').classList.add('collapsed');
+    document.getElementById('btnTogglePatientbar').textContent = '▸';
+  }
+
   // 病人資訊列（班別/床號/姓名/診斷…那一長條）顯示/隱藏：收合起來可以縮小這塊區域高度
   document.getElementById('btnTogglePatientbar').addEventListener('click', ()=>{
     const bar = document.getElementById('patientbar');
@@ -1361,6 +1416,25 @@ function evalDepends(condStr){
     return el.value === val;
   });
 }
+// 依「禁翻身方向」勾選狀態，標記 4-1 各列對應方向的按鈕為「禁止」（只換樣式，不改資料）
+function updateBans(){
+  const map = { c4_41_ban_left:'left', c4_41_ban_lying:'lying', c4_41_ban_right:'right' };
+  Object.keys(map).forEach(name=>{
+    const box = form.querySelector(`input[name="${name}"]`);
+    const on = !!(box && box.checked);
+    form.querySelectorAll(`input[type=radio][name^="c4_41_r"][value="${map[name]}"]`).forEach(r=>{
+      r.closest('label').classList.toggle('banned', on);
+    });
+  });
+}
+// 被禁止的方向不能再點選（已經選了的不動，要改請先取消禁止）
+document.addEventListener('click', e=>{
+  const r = e.target;
+  if(r.matches && r.matches('input[type=radio][name^="c4_41_r"]') && r.closest('label').classList.contains('banned') && !r.checked){
+    e.preventDefault();
+  }
+}, true);
+
 function updateDependencies(){
   form.querySelectorAll('[data-depends]').forEach(el=>{
     const ok = evalDepends(el.dataset.depends);
@@ -1370,6 +1444,7 @@ function updateDependencies(){
       else el.value = '';
     }
   });
+  updateBans();
 }
 
 /* ---------- 5-3 動態表格（可新增、可刪除列） ----------
@@ -1650,6 +1725,8 @@ function renderPatientBar(){
     <span>血型：<b>${p.血型}</b></span>
     <span>診斷：<b>${p.診斷}</b></span>
   `;
+  const sm = document.getElementById('pbSummary');
+  if(sm) sm.innerHTML = `<b>${p.床號||''}</b> ${p.姓名} ${p.性別} ${p.年齡}歲<br><span class="pb-dx">${p.診斷||''}</span>`;
   const sel = document.getElementById('bedSelect');
   if(sel) sel.value = String(currentPatientIndex);
   // 卡號同時也顯示在最上面「照顧紀錄日期」那一列，即使病人資訊列被收合起來也能隨時核對
