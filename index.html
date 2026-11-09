@@ -236,6 +236,14 @@
   .recorddate input#recTime{ width:60px !important; } /* 時間欄位寬度再縮小約 50% */
 
   .panelwrap{ flex:1; overflow-y:auto; padding:10px 14px; background:var(--green-bg2); border:1px solid var(--border); border-top:none;}
+
+  /* 交班注意事項：A 區（翻身/約束/隔離）、B 區（飲食）各一個藍框區塊 */
+  .hblock{ border:3px solid #2f5f8f; border-radius:8px; background:#fff; margin:10px 0; padding:8px 10px; }
+  .hblock-title{ font-weight:bold; font-size:20px; color:#fff; background:#2f5f8f; margin:-8px -10px 8px; padding:6px 10px; }
+  .hblock .row{ padding:6px 0; }
+  .hblock textarea.h-note{ width:100%; box-sizing:border-box; min-height:110px; font-size:20px; padding:6px; border:1px solid #888; border-radius:6px; font-family:inherit; }
+  .h-head{ font-size:18px; color:#2f5f8f; font-weight:bold; margin:4px 0; }
+  .npo{ color:#c00; font-weight:bold; font-size:22px; }
   .tabpanel{ display:none; }
   .tabpanel.active{ display:block; }
 
@@ -566,6 +574,7 @@
         <button data-tab="4">舒適與活動</button>
         <button data-tab="5">一般技術性</button>
         <button data-tab="6">電子版</button>
+        <button data-tab="7">交班<br>注意事項</button>
       </div>
 
       <div class="panelwrap">
@@ -581,6 +590,9 @@
              放在 form 外面，存檔/讀檔時的 FormData 掃描才不會誤把這裡的欄位也當成
              某一床某一班別的照護紀錄存進去。 -->
         <div class="tabpanel" id="tab6"></div>
+        <!-- 「交班注意事項」也放在 form 外面：它是「一個病人一份、白班/小夜/大夜共用」，
+             不是跟著班別走的照護紀錄，另外存在 Firestore a13records 集合的「交班_卡號」文件。 -->
+        <div class="tabpanel" id="tab7"></div>
       </div>
     </div>
   </div>
@@ -1282,6 +1294,7 @@ function buildStaticUI(){
   document.getElementById('tab4').innerHTML = buildTab4();
   document.getElementById('tab5').innerHTML = buildTab5();
   document.getElementById('tab6').innerHTML = buildTab6(); // 電子版組別分配，先用空白資料把表格骨架建起來
+  document.getElementById('tab7').innerHTML = buildTab7(); // 交班注意事項
 
   renderShiftTabs();
   updateBedCountLabel();
@@ -1383,6 +1396,7 @@ async function initAfterLogin(){
   updateBedCountLabel();
   loadSlotIntoForm(getCurrentSlot());
   subscribeSlot(); // 開始即時監聽目前這一格
+  loadHandover();
   document.getElementById('tab6').innerHTML = buildTab6(); // 用剛載入的組別分配資料重新畫一次表格
   renderPatientList();
   renderPatientBar();
@@ -1747,6 +1761,7 @@ async function selectSlot(newPatientIndex, newShift){
   renderSlotStatus();
   switching = false;
   subscribeSlot();
+  if(hPatient !== patients[currentPatientIndex]) loadHandover(); // 換了病人才重新載入交班注意事項（換班別不用）
   document.getElementById('statusLeft').textContent = '就緒';
 }
 
@@ -2292,6 +2307,116 @@ async function importXml(text){
   document.getElementById('statusLeft').textContent = '就緒（匯入完成，已同步雲端）';
   alert('匯入完成，並已同步寫回雲端！');
 }
+
+
+/* ============================================================
+   交班注意事項（一個病人一份，白班／小夜／大夜共用）
+   存放位置：Firestore a13records 集合，文件 id＝「交班_卡號」，shift 欄位固定為「交班」，
+   所以不會被一般照護紀錄的載入程式（只認 白班/小夜/大夜）誤讀。
+   同步方式與照護紀錄相同：只寫有改的欄位、即時接收別台裝置的修改。
+   ============================================================ */
+function buildTab7(){
+  const R = (n,l,v)=>radioGroup(n,l,v);
+  return `<div class="h-head" id="hHeader"></div>
+  <div class="hblock"><div class="hblock-title">A 區　翻身／約束／隔離</div>
+    <div class="row"><span class="lbl">翻身方向</span>${R('h_turn',['正常翻身','有禁止方向'],['normal','ban'])}</div>
+    <div class="row" id="hBanRow"><span class="lbl">禁止</span>${cb('h_ban_left','禁左翻身')}${cb('h_ban_lying','禁平躺')}${cb('h_ban_right','禁右翻身')}</div>
+    <div class="row"><span class="lbl">手腕約束</span>${R('h_wrist',['左','右','雙手','無'],['left','right','both','none'])}</div>
+    <div class="row"><span class="lbl">腳約束</span>${R('h_foot',['左','右','雙腳','無'],['left','right','both','none'])}</div>
+    <div class="row"><span class="lbl">隔離</span>${cb('h_iso_sputum','痰隔離')}${cb('h_iso_blood','血液隔離')}${cb('h_iso_urine','尿隔離')}${cb('h_iso_scabies','疥瘡隔離')}${cb('h_iso_other','其他')}${textInput('h_iso_other_text','其他隔離說明',null,200)}${cb('h_iso_none','無隔離')}</div>
+    <div class="row"><span class="lbl">其他注意事項</span></div>
+    <textarea class="h-note" name="h_a_note" placeholder="在此編輯其他注意事項"></textarea>
+  </div>
+  <div class="hblock"><div class="hblock-title">B 區　飲食</div>
+    <div class="row"><span class="lbl">奶</span>${R('h_milk',['是','否'],['yes','no'])}</div>
+    <div class="row" id="hMilkYes"><span class="lbl">熱量</span>${numInput('h_kcal','卡',null,110)}<span class="lbl">高蛋白</span>${numInput('h_protein_pct','%',null,80)}${numInput('h_protein_g','克',null,90)}${cb('h_dm','DM餐')}</div>
+    <div class="row" id="hMilkNo"><span class="npo">NPO　禁食</span></div>
+    <div class="row"><span class="lbl">其他注意事項</span></div>
+    <textarea class="h-note" name="h_b_note" placeholder="在此編輯其他注意事項"></textarea>
+  </div>`;
+}
+
+let hPatient = null, hBase = {}, hTimer = null, hUnsub = null, hRemoteOK = false;
+const H_EXCLUSIVE_ISO = ['h_iso_sputum','h_iso_blood','h_iso_urine','h_iso_scabies','h_iso_other'];
+function hPanel(){ return document.getElementById('tab7'); }
+function hEls(){ return Array.from(hPanel().querySelectorAll('input[name], textarea[name]')); }
+function hCollect(){
+  const out = {};
+  hEls().forEach(el=>{
+    if(el.type==='radio'){ if(!(el.name in out)) out[el.name] = ''; if(el.checked) out[el.name] = el.value; }
+    else if(el.type==='checkbox') out[el.name] = el.checked ? 'true' : 'false';
+    else out[el.name] = el.value;
+  });
+  return out;
+}
+function hSet(fields, skipEl){
+  hEls().forEach(el=>{
+    if(el === skipEl) return;
+    const v = fields[el.name];
+    if(el.type==='radio') el.checked = (v !== undefined && v === el.value);
+    else if(el.type==='checkbox') el.checked = (v === 'true');
+    else el.value = (v === undefined ? '' : v);
+  });
+  hUpdateUI();
+}
+function hUpdateUI(){
+  const f = hCollect();
+  const banRow = document.getElementById('hBanRow');
+  if(banRow) banRow.style.display = (f.h_turn==='ban') ? '' : 'none';
+  const y = document.getElementById('hMilkYes'), n = document.getElementById('hMilkNo');
+  if(y) y.style.display = (f.h_milk==='yes') ? '' : 'none';
+  if(n) n.style.display = (f.h_milk==='no') ? '' : 'none';
+}
+async function hSave(){
+  clearTimeout(hTimer); hTimer = null;
+  const p = hPatient; if(!p || !auth.currentUser) return;
+  const cur = hCollect();
+  const diff = {};
+  Object.keys(cur).forEach(k=>{ if(cur[k] !== hBase[k] && !(hBase[k] === undefined && isDefaultVal(cur[k]))) diff[k] = cur[k]; });
+  if(!Object.keys(diff).length) return;
+  try{
+    await db.collection(RECORDS_COLLECTION).doc('交班_' + p.info.卡號).set({
+      shift:'交班', cardNo:p.info.卡號, bed:p.info.床號, name:p.info.姓名,
+      updatedBy: auth.currentUser.email || '', updatedAt: new Date().toLocaleString('zh-TW',{hour12:false}),
+      fields: diff
+    }, {merge:true});
+    if(hPatient === p) Object.assign(hBase, cur);
+  }catch(err){ console.error('交班注意事項寫入失敗：', err); }
+}
+function hScheduleSave(){ clearTimeout(hTimer); hTimer = setTimeout(hSave, 800); }
+function applyRemoteHandover(d){
+  const remote = d.fields || {};
+  const cur = hCollect(), ae = document.activeElement;
+  const merged = Object.assign({}, remote);
+  Object.keys(cur).forEach(k=>{ // 本機還沒送出的修改保留
+    if(cur[k] !== hBase[k] && !(hBase[k] === undefined && isDefaultVal(cur[k]))) merged[k] = cur[k];
+  });
+  hSet(merged, (ae && hPanel().contains(ae)) ? ae : null);
+  hBase = Object.assign({}, remote);
+}
+async function loadHandover(){
+  await hSave(); // 先把舊病人還沒存的修改送出
+  if(hUnsub){ hUnsub(); hUnsub = null; }
+  const p = patients[currentPatientIndex]; hPatient = p; hBase = {};
+  if(!p) return;
+  hSet({});
+  document.getElementById('hHeader').textContent = `${p.info.床號}　${p.info.卡號}　${p.info.姓名}（白班／小夜／大夜共用）`;
+  hUnsub = db.collection(RECORDS_COLLECTION).doc('交班_' + p.info.卡號).onSnapshot(snap=>{
+    if(hPatient !== p || !snap.exists || snap.metadata.hasPendingWrites) return;
+    applyRemoteHandover(snap.data());
+  }, err=>console.error('交班注意事項監聽失敗：', err));
+}
+(function(){
+  const panel = document.getElementById('tab7');
+  panel.addEventListener('change', e=>{
+    const n = e.target.name;
+    if(n === 'h_turn' && e.target.value === 'normal'){ ['h_ban_left','h_ban_lying','h_ban_right'].forEach(k=>{ panel.querySelector(`[name=${k}]`).checked = false; }); }
+    if(H_EXCLUSIVE_ISO.includes(n) && e.target.checked) panel.querySelector('[name=h_iso_none]').checked = false;
+    if(n === 'h_iso_none' && e.target.checked){ H_EXCLUSIVE_ISO.forEach(k=>{ panel.querySelector(`[name=${k}]`).checked = false; }); panel.querySelector('[name=h_iso_other_text]').value=''; }
+    hUpdateUI(); hScheduleSave();
+  });
+  panel.addEventListener('input', e=>{ if(e.target.matches('input[type=text], input[type=number], textarea')) hScheduleSave(); });
+})();
 
 buildStaticUI();
 
