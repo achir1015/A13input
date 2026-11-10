@@ -509,31 +509,9 @@
     <label style="display:block;margin:8px 0;font-size:16px;"><input type="checkbox" id="orgRemember" style="width:auto;"> 此裝置記住（不用每次輸入）</label>
     <button type="submit" id="orgEnter" style="width:100%;padding:10px;font-size:18px;">進入</button>
     <div id="orgError" class="login-error"></div>
-    <div style="text-align:center;margin-top:8px;"><a href="#" id="orgManageLink" style="font-size:15px;">管理公司／部門</a></div>
+    <div id="orgNotice" class="login-error"></div>
+    <div style="text-align:center;margin-top:8px;font-size:13px;color:#888;">公司／部門與密碼由「月班表管理系統」新增與編輯，此處自動同步。</div>
   </form>
-</div>
-
-<!-- 管理公司／部門 -->
-<div id="orgManage" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:10000; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:#fff; border-radius:12px; max-width:480px; width:100%; max-height:90vh; overflow:auto; padding:16px 18px; font-size:16px; line-height:1.6;">
-    <h3 style="margin:0 0 8px; color:#2f6f8f;">管理公司／部門</h3>
-    <div id="orgManageLock">
-      <p>請輸入任一單位的管理者密碼解鎖：</p>
-      <input type="password" id="orgManagePw" style="width:100%;font-size:18px;padding:6px;">
-      <button id="orgManageUnlock" style="margin-top:8px;padding:6px 16px;font-size:16px;">解鎖</button>
-    </div>
-    <div id="orgManageBody" style="display:none;">
-      <div id="orgManageList"></div>
-      <hr>
-      <b>＋ 新增單位</b>
-      <input id="orgNewCompany" placeholder="公司名稱" style="width:100%;font-size:16px;padding:6px;margin:4px 0;">
-      <input id="orgNewDept" placeholder="部門名稱" style="width:100%;font-size:16px;padding:6px;margin:4px 0;">
-      <input id="orgNewPw" type="password" placeholder="管理者密碼" style="width:100%;font-size:16px;padding:6px;margin:4px 0;">
-      <button id="orgNewAdd" style="padding:6px 16px;font-size:16px;">新增</button>
-    </div>
-    <div id="orgManageMsg" style="color:#c00;min-height:1.4em;"></div>
-    <div style="text-align:right;margin-top:8px;"><button id="orgManageClose" style="padding:6px 16px;font-size:16px;">關閉</button></div>
-  </div>
 </div>
 
 <!-- 建立捷徑說明視窗 -->
@@ -759,6 +737,7 @@ async function showOrgGate(){
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('appRoot').style.display = 'none';
   renderOrgSelect();
+  document.getElementById('orgNotice').textContent = ORG_NOTICE;
   document.getElementById('orgOverlay').style.display = 'flex';
   setTimeout(()=>document.getElementById('orgPassword').focus(), 50);
 }
@@ -803,48 +782,6 @@ document.getElementById('orgForm').addEventListener('submit', async e=>{
   enterApp();
 });
 
-/* ---------- 管理公司／部門（新增／刪除／變更密碼）---------- */
-(function(){
-  const $ = id=>document.getElementById(id);
-  const modal = $('orgManage');
-  const msg = t=>{ $('orgManageMsg').textContent = t||''; };
-  $('orgManageLink').addEventListener('click', e=>{
-    e.preventDefault(); msg(''); $('orgManageLock').style.display=''; $('orgManageBody').style.display='none'; $('orgManagePw').value=''; modal.style.display='flex';
-  });
-  $('orgManageClose').addEventListener('click', ()=>{ modal.style.display='none'; renderOrgSelect(); });
-  $('orgManageUnlock').addEventListener('click', async ()=>{
-    const h = await hashOrgPassword($('orgManagePw').value);
-    if(!ORG_LIST.some(o=>o.passwordHash === h)){ msg('密碼錯誤'); return; }
-    msg(''); $('orgManageLock').style.display='none'; $('orgManageBody').style.display=''; renderList();
-  });
-  function renderList(){
-    $('orgManageList').innerHTML = ORG_LIST.map(o=>`<div style="display:flex;gap:6px;align-items:center;border-bottom:1px solid #ddd;padding:4px 0;">
-      <span style="flex:1;">${o.label}${o.id==='default'?'（原始單位）':''}</span>
-      ${o.id==='default'?'':`<button data-pw="${o.id}">變更密碼</button><button data-del="${o.id}">刪除</button>`}</div>`).join('');
-  }
-  $('orgManageList').addEventListener('click', async e=>{
-    const pwId = e.target.dataset.pw, delId = e.target.dataset.del;
-    if(pwId){
-      const np = prompt('請輸入新的管理者密碼：'); if(!np) return;
-      const o = ORG_LIST.find(x=>x.id===pwId); o.passwordHash = await hashOrgPassword(np);
-      try{ await saveOrg(o); msg('密碼已更新'); }catch(err){ msg('寫入雲端失敗：' + err.message); }
-    } else if(delId){
-      const o = ORG_LIST.find(x=>x.id===delId);
-      if(!confirm(`確定刪除「${o.label}」？（該單位的病床與紀錄資料不會一起刪除）`)) return;
-      try{ await db.collection(RECORDS_COLLECTION).doc('單位_' + delId).delete(); ORG_LIST = ORG_LIST.filter(x=>x.id!==delId); renderList(); msg('已刪除'); }
-      catch(err){ msg('刪除失敗：' + err.message); }
-    }
-  });
-  $('orgNewAdd').addEventListener('click', async ()=>{
-    const c = $('orgNewCompany').value.trim(), d = $('orgNewDept').value.trim(), pw = $('orgNewPw').value;
-    if(!c || !d || !pw){ msg('公司名稱、部門名稱、密碼都要填'); return; }
-    if(ORG_LIST.some(o=>o.company===c && o.department===d)){ msg('這個公司／部門已經存在'); return; }
-    const o = { id:newOrgId(), company:c, department:d, passwordHash: await hashOrgPassword(pw) };
-    o.label = c + '／' + d;
-    try{ await saveOrg(o); ORG_LIST.push(o); renderList(); $('orgNewCompany').value=$('orgNewDept').value=$('orgNewPw').value=''; msg('已新增'); }
-    catch(err){ msg('寫入雲端失敗：' + err.message); }
-  });
-})();
 document.getElementById('btnLock').addEventListener('click', ()=>{
   try{ sessionStorage.removeItem(ORG_FLAG); localStorage.removeItem(ORG_FLAG); }catch(_){}
   location.reload();
@@ -1864,7 +1801,6 @@ ORG.label = ORG.company + '／' + ORG.department;
 // 各單位的病床、照護紀錄、交班、電子版彼此分開：原始單位不加前綴，其他單位的文件 ID 加「單位ID__」前綴並帶 orgId 欄位
 function orgPrefix(){ return ORG.id === 'default' ? '' : ORG.id + '__'; }
 function inCurrentOrg(d){ return (d.orgId || 'default') === ORG.id; }
-function newOrgId(){ return 'org' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 const ORG_FLAG = 'a13_org_ok';
 async function hashOrgPassword(pw){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('rcw-org:' + pw));
@@ -1873,22 +1809,41 @@ async function hashOrgPassword(pw){
 function rememberedOrgId(){
   try{ return sessionStorage.getItem(ORG_FLAG) || localStorage.getItem(ORG_FLAG) || ''; }catch(_){ return ''; }
 }
-// 單位清單：預設單位 + 雲端上新增的單位（存在 a13records，文件 id＝「單位_xxx」，shift＝「單位」，不會被照護紀錄載入程式誤讀）
+/* 單位清單（公司／部門／密碼雜湊）直接讀「線上月班表管理系統（rcw-month）」雲端上的 orgs 集合：
+   公司／部門／密碼的新增與編輯都在月班表系統做，A13 這邊只讀取、不負責維護，兩邊自動同步。
+   做法：另外建立第二個 Firebase 連線（rcw），用一個在月班表系統 Firebase Authentication 裡存在的帳號登入後讀 orgs。
+   讀不到（沒網路、帳號不存在等）時，退回內建的預設單位（呼吸照護病房），系統仍可使用。 */
+const RCW_CONFIG = {
+  apiKey: "AIzaSyCDoaGP0aeW7P1nhFas-4T3krVftiroG34",
+  authDomain: "monthlyschedule-a5dea.firebaseapp.com",
+  projectId: "monthlyschedule-a5dea",
+  storageBucket: "monthlyschedule-a5dea.firebasestorage.app",
+  messagingSenderId: "204422687469",
+  appId: "1:204422687469:web:bfa6d1672fddbd576ffae4"
+};
+const RCW_LOGIN = { email: 'achir1962@gmail.com', password: 'Aa123456' }; // 需是月班表系統 Firebase 裡已建立的使用者
 let ORG_LIST = [DEFAULT_ORG];
+let ORG_NOTICE = '';
 async function loadOrgList(){
-  ORG_LIST = [DEFAULT_ORG];
+  ORG_LIST = [DEFAULT_ORG]; ORG_NOTICE = '';
   try{
-    const snap = await db.collection(RECORDS_COLLECTION).where('shift','==','單位').get();
+    const rcw = firebase.apps.find(a=>a.name==='rcw') || firebase.initializeApp(RCW_CONFIG, 'rcw');
+    const rauth = rcw.auth();
+    if(!rauth.currentUser) await rauth.signInWithEmailAndPassword(RCW_LOGIN.email, RCW_LOGIN.password);
+    const snap = await rcw.firestore().collection('orgs').get();
+    const list = [];
     snap.forEach(doc=>{
       const d = doc.data();
-      if(d.company && d.department && d.passwordHash) ORG_LIST.push({ id: d.orgId, company:d.company, department:d.department, passwordHash:d.passwordHash });
+      if(d.company && d.department && d.passwordHash) list.push({ id: doc.id, company:d.company, department:d.department, passwordHash:d.passwordHash });
     });
-  }catch(err){ console.error('讀取單位清單失敗，只提供預設單位：', err); }
+    if(list.length) ORG_LIST = list; else ORG_NOTICE = '月班表系統目前沒有單位資料，暫用內建單位。';
+  }catch(err){
+    console.error('讀取月班表系統的單位清單失敗，暫用內建單位：', err);
+    ORG_NOTICE = '無法連線月班表系統（' + (err.code || err.message) + '），暫用內建單位。';
+  }
   ORG_LIST.forEach(o=>{ o.label = o.company + '／' + o.department; });
 }
-async function saveOrg(o){
-  await db.collection(RECORDS_COLLECTION).doc('單位_' + o.id).set({ shift:'單位', orgId:o.id, company:o.company, department:o.department, passwordHash:o.passwordHash });
-}
+
 
 let currentShift = '白班';
 
