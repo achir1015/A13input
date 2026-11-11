@@ -2717,7 +2717,8 @@ async function hRenderLang(){
   const items = await hBuildTranslation(hLang);
   if(my !== hTransToken) return; // 期間又切換了語言
   const D = H_DICT[hLang], p = hPatient;
-  const head = p ? `<div style="font-size:16px;margin-bottom:6px;">${hEsc(p.info.床號)}　${hEsc(p.info.姓名)}　${hEsc(p.info.性別)}　${hEsc(p.info.年齡)}歲　${hEsc(p.info.醫師||p.info.醫署||'')}</div>` : '';
+  const dt = new Date(), ymd = `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`; // 西元年月日
+  const head = p ? `<div style="font-size:16px;margin-bottom:6px;">${ymd}　${hEsc(p.info.卡號)}</div>` : '';
   let anyBad = false;
   body.innerHTML = head + items.map(i=>{
     if(i.h) return `<h4>${hEsc(i.h)}</h4>`;
