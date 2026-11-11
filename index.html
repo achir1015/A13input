@@ -2611,7 +2611,7 @@ const H_LANGS = {
   th:{ name:'ไทย',        tts:'th-TH', rss:'th-th' }
 };
 const H_DICT = {
-  en:{ zoneA:'Zone A: Turning / Restraints / Isolation', zoneB:'Zone B: Diet', bed:'Bed',
+  en:{ zoneA:'Zone A: Turning / Restraints / Isolation', zoneB:'Zone B: Diet', bed:'Chart number',
     turnNormal:'Turning: normal turning.', turnBan:'Turning: do not position the patient as follows:',
     ban:{left:'Do not turn to the left.', lying:'Do not lie flat.', right:'Do not turn to the right.'},
     wrist:'Wrist restraint:', wristV:{left:'left wrist',right:'right wrist',both:'both wrists',none:'none'},
@@ -2619,7 +2619,7 @@ const H_DICT = {
     iso:'Isolation:', isoV:{sputum:'sputum isolation',blood:'blood isolation',urine:'urine isolation',scabies:'scabies isolation',other:'other isolation',none:'no isolation'},
     note:'Other notes:', milkYes:'Milk feeding: yes.', kcal:n=>`Calories: ${n} kcal.`, prot:(p,g)=>`High protein: ${[p?p+' percent':'',g?g+' grams':''].filter(Boolean).join(', ')}.`,
     dm:'Diabetic (DM) diet.', milkNo:'Milk feeding: no. NPO, nothing by mouth (fasting).', empty:'No handover notes have been entered.', untranslated:'(not translated)' },
-  id:{ zoneA:'Area A: Posisi tubuh / Pengikat / Isolasi', zoneB:'Area B: Makanan', bed:'Tempat tidur',
+  id:{ zoneA:'Area A: Posisi tubuh / Pengikat / Isolasi', zoneB:'Area B: Makanan', bed:'Nomor kartu',
     turnNormal:'Perubahan posisi: normal.', turnBan:'Perubahan posisi: jangan memposisikan pasien sebagai berikut:',
     ban:{left:'Jangan miring ke kiri.', lying:'Jangan telentang.', right:'Jangan miring ke kanan.'},
     wrist:'Pengikat pergelangan tangan:', wristV:{left:'kiri',right:'kanan',both:'kedua tangan',none:'tidak ada'},
@@ -2627,7 +2627,7 @@ const H_DICT = {
     iso:'Isolasi:', isoV:{sputum:'isolasi dahak',blood:'isolasi darah',urine:'isolasi urin',scabies:'isolasi kudis (skabies)',other:'isolasi lainnya',none:'tanpa isolasi'},
     note:'Catatan lain:', milkYes:'Pemberian susu: ya.', kcal:n=>`Kalori: ${n} kkal.`, prot:(p,g)=>`Tinggi protein: ${[p?p+' persen':'',g?g+' gram':''].filter(Boolean).join(', ')}.`,
     dm:'Diet khusus diabetes (DM).', milkNo:'Pemberian susu: tidak. Puasa (NPO), tidak boleh makan atau minum.', empty:'Belum ada catatan serah terima.', untranslated:'(belum diterjemahkan)' },
-  vi:{ zoneA:'Khu A: Xoay trở / Cố định / Cách ly', zoneB:'Khu B: Chế độ ăn', bed:'Giường',
+  vi:{ zoneA:'Khu A: Xoay trở / Cố định / Cách ly', zoneB:'Khu B: Chế độ ăn', bed:'Số thẻ',
     turnNormal:'Xoay trở: bình thường.', turnBan:'Xoay trở: không cho bệnh nhân nằm ở các tư thế sau:',
     ban:{left:'Không nằm nghiêng bên trái.', lying:'Không nằm ngửa.', right:'Không nằm nghiêng bên phải.'},
     wrist:'Cố định cổ tay:', wristV:{left:'cổ tay trái',right:'cổ tay phải',both:'hai cổ tay',none:'không'},
@@ -2635,7 +2635,7 @@ const H_DICT = {
     iso:'Cách ly:', isoV:{sputum:'cách ly đờm',blood:'cách ly máu',urine:'cách ly nước tiểu',scabies:'cách ly ghẻ',other:'cách ly khác',none:'không cách ly'},
     note:'Ghi chú khác:', milkYes:'Ăn sữa: có.', kcal:n=>`Năng lượng: ${n} kcal.`, prot:(p,g)=>`Đạm cao: ${[p?p+' phần trăm':'',g?g+' gam':''].filter(Boolean).join(', ')}.`,
     dm:'Chế độ ăn cho người tiểu đường (DM).', milkNo:'Ăn sữa: không. Nhịn ăn (NPO), không được ăn uống.', empty:'Chưa có ghi chú bàn giao.', untranslated:'(chưa dịch)' },
-  th:{ zoneA:'โซน A: การพลิกตัว / การผูกยึด / การแยกโรค', zoneB:'โซน B: อาหาร', bed:'เตียง',
+  th:{ zoneA:'โซน A: การพลิกตัว / การผูกยึด / การแยกโรค', zoneB:'โซน B: อาหาร', bed:'หมายเลขบัตร',
     turnNormal:'การพลิกตัว: ปกติ', turnBan:'การพลิกตัว: ห้ามจัดท่าผู้ป่วยดังนี้:',
     ban:{left:'ห้ามพลิกตะแคงซ้าย',lying:'ห้ามนอนหงาย',right:'ห้ามพลิกตะแคงขวา'},
     wrist:'การผูกยึดข้อมือ:', wristV:{left:'ข้อมือซ้าย',right:'ข้อมือขวา',both:'ข้อมือทั้งสองข้าง',none:'ไม่มี'},
@@ -2727,10 +2727,10 @@ async function hRenderLang(){
   }).join('');
   st.style.color = '#c00';
   st.textContent = anyBad ? '部分自由輸入文字無法連線翻譯，已顯示原文。' : '';
-  // 朗讀稿：床號 + 各項目（不含姓名、年齡等基本資料）
-  const num = p && (p.info.床號||'').match(/\d+/);
+  // 朗讀稿：卡號 + 各項目（不含姓名、年齡等基本資料）
+  const card = p && (p.info.卡號||'').trim();
   hTransSpoken = [];
-  if(num) hTransSpoken.push(`${D.bed} ${num[0]}.`);
+  if(card) hTransSpoken.push(`${D.bed} ${card.split('').join(' ')}.`); // 卡號逐字唸出
   items.forEach(i=>{ const t = i.h || i.t; if(t) hTransSpoken.push(t.replace(/^[\s　•]+/, '').trim()); });
 }
 
@@ -2750,7 +2750,7 @@ function hSpeak(){
 }
 function hFileName(){
   const d = new Date(), y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
-  const bed = (hPatient && hPatient.info.床號 || '').replace(/[\\/:*?"<>|\s]/g,'');
+  const bed = (hPatient && hPatient.info.卡號 || '').replace(/[\\/:*?"<>|\s]/g,'');
   return `${y}${m}${dd}_${bed}.mp3`;
 }
 async function hDownloadMp3(){
