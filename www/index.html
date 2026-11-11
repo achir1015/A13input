@@ -2480,7 +2480,7 @@ async function importXml(text){
 function buildTab7(){
   const R = (n,l,v)=>radioGroup(n,l,v);
   return `<div class="h-head" id="hHeader"></div>
-  <div class="h-langbar" id="hLangBar"><button type="button" data-lang="zh" class="active">繁中</button><button type="button" data-lang="en">English</button><button type="button" data-lang="id">Indonesia</button><button type="button" data-lang="vi">Tiếng Việt</button><button type="button" data-lang="th">ไทย</button></div>
+  <div class="h-langbar" id="hLangBar"><button type="button" data-lang="zh" class="active">繁中</button><button type="button" data-lang="en">English</button><button type="button" data-lang="id">Indonesia</button><button type="button" data-lang="vi">Tiếng Việt</button><button type="button" data-lang="th">ไทย</button><button type="button" data-lang="ja">日本語</button><button type="button" data-lang="ko">한국어</button></div>
   <div id="hTrans" style="display:none">
     <div class="h-trans-actions"><button type="button" id="hSpeak">🔊 發音</button><button type="button" id="hStop">⏹ 停止</button><button type="button" id="hMp3">⬇ 下載 MP3</button></div>
     <div class="h-trans-status" id="hTransStatus"></div>
@@ -2608,7 +2608,9 @@ const H_LANGS = {
   en:{ name:'English',    tts:'en-US', rss:'en-us' },
   id:{ name:'Indonesia',  tts:'id-ID', rss:'id-id' },
   vi:{ name:'Tiếng Việt', tts:'vi-VN', rss:'vi-vn' },
-  th:{ name:'ไทย',        tts:'th-TH', rss:'th-th' }
+  th:{ name:'ไทย',        tts:'th-TH', rss:'th-th' },
+  ja:{ name:'日本語',      tts:'ja-JP', rss:'ja-jp' },
+  ko:{ name:'한국어',      tts:'ko-KR', rss:'ko-kr' }
 };
 const H_DICT = {
   en:{ zoneA:'Zone A: Turning / Restraints / Isolation', zoneB:'Zone B: Diet', bed:'Chart number',
@@ -2642,7 +2644,23 @@ const H_DICT = {
     foot:'การผูกยึดเท้า:', footV:{left:'เท้าซ้าย',right:'เท้าขวา',both:'เท้าทั้งสองข้าง',none:'ไม่มี'},
     iso:'การแยกโรค:', isoV:{sputum:'แยกโรคทางเสมหะ',blood:'แยกโรคทางเลือด',urine:'แยกโรคทางปัสสาวะ',scabies:'แยกโรคหิด',other:'แยกโรคอื่น ๆ',none:'ไม่ต้องแยกโรค'},
     note:'หมายเหตุอื่น ๆ:', milkYes:'การให้นม: ให้', kcal:n=>`พลังงาน ${n} กิโลแคลอรี`, prot:(p,g)=>`โปรตีนสูง ${[p?p+' เปอร์เซ็นต์':'',g?g+' กรัม':''].filter(Boolean).join(' ')}`,
-    dm:'อาหารสำหรับผู้ป่วยเบาหวาน (DM)', milkNo:'การให้นม: ไม่ให้ งดอาหารและน้ำ (NPO)', empty:'ยังไม่มีบันทึกการส่งเวร', untranslated:'(ยังไม่แปล)' }
+    dm:'อาหารสำหรับผู้ป่วยเบาหวาน (DM)', milkNo:'การให้นม: ไม่ให้ งดอาหารและน้ำ (NPO)', empty:'ยังไม่มีบันทึกการส่งเวร', untranslated:'(ยังไม่แปล)' },
+  ja:{ zoneA:'Aエリア：体位変換／拘束／隔離', zoneB:'Bエリア：食事', bed:'カード番号',
+    turnNormal:'体位変換：通常どおり。', turnBan:'体位変換：次の体位は禁止です。',
+    ban:{left:'左向きは禁止です。', lying:'仰向けは禁止です。', right:'右向きは禁止です。'},
+    wrist:'手首の拘束：', wristV:{left:'左手首',right:'右手首',both:'両手首',none:'なし'},
+    foot:'足の拘束：', footV:{left:'左足',right:'右足',both:'両足',none:'なし'},
+    iso:'隔離：', isoV:{sputum:'喀痰隔離',blood:'血液隔離',urine:'尿隔離',scabies:'疥癬隔離',other:'その他の隔離',none:'隔離なし'},
+    note:'その他の注意事項：', milkYes:'牛乳（栄養剤）：あり。', kcal:n=>`熱量：${n}キロカロリー。`, prot:(p,g)=>`高たんぱく：${[p?p+'パーセント':'',g?g+'グラム':''].filter(Boolean).join('、')}。`,
+    dm:'糖尿病（DM）食。', milkNo:'牛乳（栄養剤）：なし。絶食（NPO）、飲食禁止。', empty:'申し送り事項は入力されていません。', untranslated:'（未翻訳）' },
+  ko:{ zoneA:'A구역: 체위 변경 / 억제대 / 격리', zoneB:'B구역: 식이', bed:'카드 번호',
+    turnNormal:'체위 변경: 정상.', turnBan:'체위 변경: 다음 자세는 금지입니다.',
+    ban:{left:'왼쪽으로 돌려 눕히지 마세요.', lying:'똑바로 눕히지 마세요.', right:'오른쪽으로 돌려 눕히지 마세요.'},
+    wrist:'손목 억제대:', wristV:{left:'왼쪽 손목',right:'오른쪽 손목',both:'양쪽 손목',none:'없음'},
+    foot:'발 억제대:', footV:{left:'왼쪽 발',right:'오른쪽 발',both:'양쪽 발',none:'없음'},
+    iso:'격리:', isoV:{sputum:'객담 격리',blood:'혈액 격리',urine:'소변 격리',scabies:'옴 격리',other:'기타 격리',none:'격리 없음'},
+    note:'기타 주의사항:', milkYes:'우유(경관영양): 예.', kcal:n=>`열량: ${n}킬로칼로리.`, prot:(p,g)=>`고단백: ${[p?p+'퍼센트':'',g?g+'그램':''].filter(Boolean).join(', ')}.`,
+    dm:'당뇨(DM) 식이.', milkNo:'우유(경관영양): 아니요. 금식(NPO), 먹거나 마시면 안 됩니다.', empty:'입력된 인수인계 사항이 없습니다.', untranslated:'(미번역)' }
 };
 let hLang = 'zh', hTransToken = 0, hTransSpoken = [];
 const hTransCache = new Map();
@@ -2718,7 +2736,7 @@ async function hRenderLang(){
   if(my !== hTransToken) return; // 期間又切換了語言
   const D = H_DICT[hLang], p = hPatient;
   const dt = new Date(), ymd = `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`; // 西元年月日
-  const head = p ? `<div style="font-size:16px;margin-bottom:6px;">${ymd}　${hEsc(p.info.卡號)}</div>` : '';
+  const head = p ? `<div style="font-size:16px;margin-bottom:6px;">${ymd}　${D.bed}：${hEsc(p.info.卡號)}</div>` : '';
   let anyBad = false;
   body.innerHTML = head + items.map(i=>{
     if(i.h) return `<h4>${hEsc(i.h)}</h4>`;
