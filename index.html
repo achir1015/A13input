@@ -246,6 +246,15 @@
   .titletext{ min-width:0; line-height:1.2; }
   .titletext > div{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .orgline{ font-size:12px; opacity:.85; }
+  .h-langbar{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+  .h-langbar button{ font-size:16px; padding:6px 12px; border:1px solid #2f7f7d; background:#fff; color:#2f7f7d; border-radius:16px; }
+  .h-langbar button.active{ background:#2f7f7d; color:#fff; }
+  .h-trans-actions{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0; }
+  .h-trans-actions button{ font-size:17px; padding:8px 14px; border-radius:6px; border:1px solid #2f5f8f; background:#eaf3fb; }
+  .h-trans-status{ font-size:14px; min-height:18px; }
+  .h-trans-body{ font-size:20px; line-height:1.5; border:1px solid #aaa; border-radius:6px; padding:8px; background:#fff; }
+  .h-trans-body h4{ margin:10px 0 4px; color:#2f5f8f; }
+  .h-trans-body .orig{ font-size:14px; color:#777; }
   .h-head{ font-size:18px; color:#2f5f8f; font-weight:bold; margin:4px 0; }
   .npo{ color:#c00; font-weight:bold; font-size:22px; }
   .tabpanel{ display:none; }
@@ -2471,6 +2480,13 @@ async function importXml(text){
 function buildTab7(){
   const R = (n,l,v)=>radioGroup(n,l,v);
   return `<div class="h-head" id="hHeader"></div>
+  <div class="h-langbar" id="hLangBar"><button type="button" data-lang="zh" class="active">繁中</button><button type="button" data-lang="en">English</button><button type="button" data-lang="id">Indonesia</button><button type="button" data-lang="vi">Tiếng Việt</button><button type="button" data-lang="th">ไทย</button></div>
+  <div id="hTrans" style="display:none">
+    <div class="h-trans-actions"><button type="button" id="hSpeak">🔊 發音</button><button type="button" id="hStop">⏹ 停止</button><button type="button" id="hMp3">⬇ 下載 MP3</button></div>
+    <div class="h-trans-status" id="hTransStatus"></div>
+    <div class="h-trans-body" id="hTransBody"></div>
+  </div>
+  <div id="hEditor">
   <div class="hblock"><div class="hblock-title">A 區　翻身／約束／隔離</div>
     <div class="row"><span class="lbl">翻身方向</span>${R('h_turn',['正常翻身','有禁止方向'],['normal','ban'])}</div>
     <div class="row" id="hBanRow"><span class="lbl">禁止</span>${cb('h_ban_left','禁左翻身')}${cb('h_ban_lying','禁平躺')}${cb('h_ban_right','禁右翻身')}</div>
@@ -2486,6 +2502,7 @@ function buildTab7(){
     <div class="row" id="hMilkNo"><span class="npo">NPO　禁食</span></div>
     <div class="row"><span class="lbl">其他注意事項</span></div>
     <textarea class="h-note h-note-b" name="h_b_note" placeholder="在此編輯其他注意事項"></textarea>
+  </div>
   </div>`;
 }
 
@@ -2547,6 +2564,7 @@ function applyRemoteHandover(d){
   });
   hSet(merged, (ae && hPanel().contains(ae)) ? ae : null);
   hBase = Object.assign({}, remote);
+  if(hLang !== 'zh') hRenderLang();
 }
 async function loadHandover(){
   await hSave(); // 先把舊病人還沒存的修改送出
@@ -2554,6 +2572,7 @@ async function loadHandover(){
   const p = patients[currentPatientIndex]; hPatient = p; hBase = {};
   if(!p) return;
   hSet({});
+  if(hLang !== 'zh') hRenderLang();
   document.getElementById('hHeader').textContent = `${p.info.床號}　${p.info.卡號}　${p.info.姓名}（白班／小夜／大夜共用）`;
   hUnsub = db.collection(RECORDS_COLLECTION).doc(orgPrefix() + '交班_' + p.info.卡號).onSnapshot(snap=>{
     if(hPatient !== p || !snap.exists || snap.metadata.hasPendingWrites) return;
@@ -2571,6 +2590,205 @@ async function loadHandover(){
   });
   panel.addEventListener('input', e=>{ if(e.target.matches('input[type=text], input[type=number], textarea')) hScheduleSave(); });
 })();
+
+
+/* ============================================================
+   交班注意事項：翻譯（英語／印尼語／越南語／泰語）＋ 語音發音 ＋ MP3 下載
+   - 固定欄位（翻身、約束、隔離、飲食…）用內建詞庫，不需要網路、不會翻錯。
+   - 自由輸入的文字（其他注意事項、其他隔離說明）用線上機器翻譯（Google 免費翻譯，失敗改用 MyMemory）；
+     翻不出來就顯示原文並註明「未翻譯」。
+   - 病人姓名、性別、年齡、醫師等基本資料不翻譯，原樣顯示。
+   - 只顯示有填寫的項目。
+   - 發音：用手機／電腦內建的語音（speechSynthesis）。
+   - MP3 下載：瀏覽器無法把內建語音存成檔案，所以用 VoiceRSS 線上語音合成（免費金鑰，第一次按會請你貼上金鑰）。
+     檔名：年月日_病床號.mp3，例如 20261112_01床.mp3。
+   翻譯內容為機器／草稿翻譯，臨床上重要的事項請由母語人員確認。
+   ============================================================ */
+const H_LANGS = {
+  en:{ name:'English',    tts:'en-US', rss:'en-us' },
+  id:{ name:'Indonesia',  tts:'id-ID', rss:'id-id' },
+  vi:{ name:'Tiếng Việt', tts:'vi-VN', rss:'vi-vn' },
+  th:{ name:'ไทย',        tts:'th-TH', rss:'th-th' }
+};
+const H_DICT = {
+  en:{ zoneA:'Zone A: Turning / Restraints / Isolation', zoneB:'Zone B: Diet', bed:'Bed',
+    turnNormal:'Turning: normal turning.', turnBan:'Turning: do not position the patient as follows:',
+    ban:{left:'Do not turn to the left.', lying:'Do not lie flat.', right:'Do not turn to the right.'},
+    wrist:'Wrist restraint:', wristV:{left:'left wrist',right:'right wrist',both:'both wrists',none:'none'},
+    foot:'Foot restraint:', footV:{left:'left foot',right:'right foot',both:'both feet',none:'none'},
+    iso:'Isolation:', isoV:{sputum:'sputum isolation',blood:'blood isolation',urine:'urine isolation',scabies:'scabies isolation',other:'other isolation',none:'no isolation'},
+    note:'Other notes:', milkYes:'Milk feeding: yes.', kcal:n=>`Calories: ${n} kcal.`, prot:(p,g)=>`High protein: ${[p?p+' percent':'',g?g+' grams':''].filter(Boolean).join(', ')}.`,
+    dm:'Diabetic (DM) diet.', milkNo:'Milk feeding: no. NPO, nothing by mouth (fasting).', empty:'No handover notes have been entered.', untranslated:'(not translated)' },
+  id:{ zoneA:'Area A: Posisi tubuh / Pengikat / Isolasi', zoneB:'Area B: Makanan', bed:'Tempat tidur',
+    turnNormal:'Perubahan posisi: normal.', turnBan:'Perubahan posisi: jangan memposisikan pasien sebagai berikut:',
+    ban:{left:'Jangan miring ke kiri.', lying:'Jangan telentang.', right:'Jangan miring ke kanan.'},
+    wrist:'Pengikat pergelangan tangan:', wristV:{left:'kiri',right:'kanan',both:'kedua tangan',none:'tidak ada'},
+    foot:'Pengikat kaki:', footV:{left:'kaki kiri',right:'kaki kanan',both:'kedua kaki',none:'tidak ada'},
+    iso:'Isolasi:', isoV:{sputum:'isolasi dahak',blood:'isolasi darah',urine:'isolasi urin',scabies:'isolasi kudis (skabies)',other:'isolasi lainnya',none:'tanpa isolasi'},
+    note:'Catatan lain:', milkYes:'Pemberian susu: ya.', kcal:n=>`Kalori: ${n} kkal.`, prot:(p,g)=>`Tinggi protein: ${[p?p+' persen':'',g?g+' gram':''].filter(Boolean).join(', ')}.`,
+    dm:'Diet khusus diabetes (DM).', milkNo:'Pemberian susu: tidak. Puasa (NPO), tidak boleh makan atau minum.', empty:'Belum ada catatan serah terima.', untranslated:'(belum diterjemahkan)' },
+  vi:{ zoneA:'Khu A: Xoay trở / Cố định / Cách ly', zoneB:'Khu B: Chế độ ăn', bed:'Giường',
+    turnNormal:'Xoay trở: bình thường.', turnBan:'Xoay trở: không cho bệnh nhân nằm ở các tư thế sau:',
+    ban:{left:'Không nằm nghiêng bên trái.', lying:'Không nằm ngửa.', right:'Không nằm nghiêng bên phải.'},
+    wrist:'Cố định cổ tay:', wristV:{left:'cổ tay trái',right:'cổ tay phải',both:'hai cổ tay',none:'không'},
+    foot:'Cố định chân:', footV:{left:'chân trái',right:'chân phải',both:'hai chân',none:'không'},
+    iso:'Cách ly:', isoV:{sputum:'cách ly đờm',blood:'cách ly máu',urine:'cách ly nước tiểu',scabies:'cách ly ghẻ',other:'cách ly khác',none:'không cách ly'},
+    note:'Ghi chú khác:', milkYes:'Ăn sữa: có.', kcal:n=>`Năng lượng: ${n} kcal.`, prot:(p,g)=>`Đạm cao: ${[p?p+' phần trăm':'',g?g+' gam':''].filter(Boolean).join(', ')}.`,
+    dm:'Chế độ ăn cho người tiểu đường (DM).', milkNo:'Ăn sữa: không. Nhịn ăn (NPO), không được ăn uống.', empty:'Chưa có ghi chú bàn giao.', untranslated:'(chưa dịch)' },
+  th:{ zoneA:'โซน A: การพลิกตัว / การผูกยึด / การแยกโรค', zoneB:'โซน B: อาหาร', bed:'เตียง',
+    turnNormal:'การพลิกตัว: ปกติ', turnBan:'การพลิกตัว: ห้ามจัดท่าผู้ป่วยดังนี้:',
+    ban:{left:'ห้ามพลิกตะแคงซ้าย',lying:'ห้ามนอนหงาย',right:'ห้ามพลิกตะแคงขวา'},
+    wrist:'การผูกยึดข้อมือ:', wristV:{left:'ข้อมือซ้าย',right:'ข้อมือขวา',both:'ข้อมือทั้งสองข้าง',none:'ไม่มี'},
+    foot:'การผูกยึดเท้า:', footV:{left:'เท้าซ้าย',right:'เท้าขวา',both:'เท้าทั้งสองข้าง',none:'ไม่มี'},
+    iso:'การแยกโรค:', isoV:{sputum:'แยกโรคทางเสมหะ',blood:'แยกโรคทางเลือด',urine:'แยกโรคทางปัสสาวะ',scabies:'แยกโรคหิด',other:'แยกโรคอื่น ๆ',none:'ไม่ต้องแยกโรค'},
+    note:'หมายเหตุอื่น ๆ:', milkYes:'การให้นม: ให้', kcal:n=>`พลังงาน ${n} กิโลแคลอรี`, prot:(p,g)=>`โปรตีนสูง ${[p?p+' เปอร์เซ็นต์':'',g?g+' กรัม':''].filter(Boolean).join(' ')}`,
+    dm:'อาหารสำหรับผู้ป่วยเบาหวาน (DM)', milkNo:'การให้นม: ไม่ให้ งดอาหารและน้ำ (NPO)', empty:'ยังไม่มีบันทึกการส่งเวร', untranslated:'(ยังไม่แปล)' }
+};
+let hLang = 'zh', hTransToken = 0, hTransSpoken = [];
+const hTransCache = new Map();
+
+async function hTranslateText(text, lang){
+  const key = lang + '|' + text;
+  if(hTransCache.has(key)) return hTransCache.get(key);
+  let out = null;
+  try{ // 1) Google 免費翻譯
+    const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=' + lang + '&dt=t&q=' + encodeURIComponent(text));
+    const j = await r.json();
+    out = j[0].map(x=>x[0]).join('');
+  }catch(_){}
+  if(!out){
+    try{ // 2) MyMemory
+      const r = await fetch('https://api.mymemory.translated.net/get?langpair=zh-TW|' + lang + '&q=' + encodeURIComponent(text));
+      const j = await r.json();
+      if(j.responseData && j.responseData.translatedText) out = j.responseData.translatedText;
+    }catch(_){}
+  }
+  if(out) hTransCache.set(key, out);
+  return out;
+}
+
+// 依目前填寫的資料，組出該語言要顯示／朗讀的項目（只含有填的項目）
+async function hBuildTranslation(lang){
+  const f = hCollect(), D = H_DICT[lang], items = [];
+  const free = async t=>{ t = (t||'').trim(); if(!t) return null; const tr = await hTranslateText(t, lang); return { tr: tr || null, orig: t }; };
+  const aItems = [];
+  if(f.h_turn === 'normal') aItems.push({ t: D.turnNormal });
+  if(f.h_turn === 'ban'){
+    aItems.push({ t: D.turnBan });
+    ['left','lying','right'].filter(k=>f['h_ban_'+k]==='true').forEach(k=>aItems.push({ t: '　• ' + D.ban[k] }));
+  }
+  if(f.h_wrist) aItems.push({ t: D.wrist + ' ' + D.wristV[f.h_wrist] + '.' });
+  if(f.h_foot) aItems.push({ t: D.foot + ' ' + D.footV[f.h_foot] + '.' });
+  const iso = ['sputum','blood','urine','scabies'].filter(k=>f['h_iso_'+k]==='true').map(k=>D.isoV[k]);
+  let otherIso = null;
+  if(f.h_iso_other === 'true'){
+    otherIso = await free(f.h_iso_other_text);
+    iso.push(D.isoV.other + (otherIso ? ' (' + (otherIso.tr || otherIso.orig) + ')' : ''));
+  }
+  if(f.h_iso_none === 'true') iso.push(D.isoV.none);
+  if(iso.length) aItems.push({ t: D.iso + ' ' + iso.join(', ') + '.', orig: otherIso && otherIso.orig, bad: !!(otherIso && !otherIso.tr) });
+  const aNote = await free(f.h_a_note);
+  if(aNote) aItems.push({ t: D.note + ' ' + (aNote.tr || aNote.orig), orig: aNote.orig, bad: !aNote.tr });
+  if(aItems.length) items.push({ h: D.zoneA }, ...aItems);
+  const bItems = [];
+  if(f.h_milk === 'yes'){
+    bItems.push({ t: D.milkYes });
+    if(f.h_kcal) bItems.push({ t: '　• ' + D.kcal(f.h_kcal) });
+    if(f.h_protein_pct || f.h_protein_g) bItems.push({ t: '　• ' + D.prot(f.h_protein_pct, f.h_protein_g) });
+    if(f.h_dm === 'true') bItems.push({ t: '　• ' + D.dm });
+  } else if(f.h_milk === 'no') bItems.push({ t: D.milkNo });
+  const bNote = await free(f.h_b_note);
+  if(bNote) bItems.push({ t: D.note + ' ' + (bNote.tr || bNote.orig), orig: bNote.orig, bad: !bNote.tr });
+  if(bItems.length) items.push({ h: D.zoneB }, ...bItems);
+  if(!items.length) items.push({ t: D.empty });
+  return items;
+}
+
+function hEsc(t){ return String(t).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+async function hRenderLang(){
+  const zh = hLang === 'zh';
+  document.getElementById('hEditor').style.display = zh ? '' : 'none';
+  document.getElementById('hTrans').style.display = zh ? 'none' : '';
+  document.querySelectorAll('#hLangBar button').forEach(b=>b.classList.toggle('active', b.dataset.lang === hLang));
+  hStopSpeech();
+  if(zh) return;
+  const my = ++hTransToken, body = document.getElementById('hTransBody'), st = document.getElementById('hTransStatus');
+  body.innerHTML = '翻譯中…'; st.textContent = '';
+  const items = await hBuildTranslation(hLang);
+  if(my !== hTransToken) return; // 期間又切換了語言
+  const D = H_DICT[hLang], p = hPatient;
+  const head = p ? `<div style="font-size:16px;margin-bottom:6px;">${hEsc(p.info.床號)}　${hEsc(p.info.姓名)}　${hEsc(p.info.性別)}　${hEsc(p.info.年齡)}歲　${hEsc(p.info.醫師||p.info.醫署||'')}</div>` : '';
+  let anyBad = false;
+  body.innerHTML = head + items.map(i=>{
+    if(i.h) return `<h4>${hEsc(i.h)}</h4>`;
+    if(i.bad) anyBad = true;
+    return `<div>${hEsc(i.t)}${i.bad ? ' <span class="orig">' + D.untranslated + '</span>' : ''}${i.orig && !i.bad ? '<div class="orig">原文：' + hEsc(i.orig) + '</div>' : ''}</div>`;
+  }).join('');
+  st.style.color = '#c00';
+  st.textContent = anyBad ? '部分自由輸入文字無法連線翻譯，已顯示原文。' : '';
+  // 朗讀稿：床號 + 各項目（不含姓名、年齡等基本資料）
+  const num = p && (p.info.床號||'').match(/\d+/);
+  hTransSpoken = [];
+  if(num) hTransSpoken.push(`${D.bed} ${num[0]}.`);
+  items.forEach(i=>{ const t = i.h || i.t; if(t) hTransSpoken.push(t.replace(/^[\s　•]+/, '').trim()); });
+}
+
+function hStopSpeech(){ try{ speechSynthesis.cancel(); }catch(_){} }
+function hSpeak(){
+  const st = document.getElementById('hTransStatus'); st.style.color = '#c00';
+  if(!('speechSynthesis' in window)){ st.textContent = '此裝置不支援語音朗讀。'; return; }
+  hStopSpeech();
+  const L = H_LANGS[hLang]; if(!L || !hTransSpoken.length) return;
+  const voices = speechSynthesis.getVoices() || [];
+  const v = voices.find(x=>x.lang && x.lang.toLowerCase().replace('_','-') === L.tts.toLowerCase()) || voices.find(x=>x.lang && x.lang.toLowerCase().startsWith(hLang));
+  st.textContent = v ? '' : '此裝置沒有找到「' + L.name + '」語音，可能無法發音（請到系統設定安裝該語言的文字轉語音）。';
+  hTransSpoken.forEach(t=>{
+    const u = new SpeechSynthesisUtterance(t); u.lang = L.tts; if(v) u.voice = v; u.rate = 0.95;
+    speechSynthesis.speak(u);
+  });
+}
+function hFileName(){
+  const d = new Date(), y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+  const bed = (hPatient && hPatient.info.床號 || '').replace(/[\\/:*?"<>|\s]/g,'');
+  return `${y}${m}${dd}_${bed}.mp3`;
+}
+async function hDownloadMp3(){
+  const st = document.getElementById('hTransStatus');
+  if(!hTransSpoken.length){ st.style.color = '#c00'; st.textContent = '沒有可轉成語音的內容。'; return; }
+  let key = '';
+  try{ key = localStorage.getItem('a13_voicerss_key') || ''; }catch(_){}
+  if(!key){
+    key = (prompt('下載 MP3 需要 VoiceRSS 免費語音金鑰（不需信用卡，每天 350 次）。\n到 https://www.voicerss.org/registration.aspx 註冊後，把 API Key 貼在這裡：') || '').trim();
+    if(!key) return;
+    try{ localStorage.setItem('a13_voicerss_key', key); }catch(_){}
+  }
+  st.style.color = '#2f7f7d'; st.textContent = '產生 MP3 中…';
+  try{
+    const body = new URLSearchParams({ key, hl: H_LANGS[hLang].rss, c:'MP3', f:'44khz_16bit_mono', src: hTransSpoken.join('\n') });
+    const r = await fetch('https://api.voicerss.org/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+    const blob = await r.blob();
+    if(!/audio|mpeg|octet/i.test(blob.type)){ // VoiceRSS 出錯時回傳純文字 ERROR: ...
+      const msg = await blob.text();
+      if(/key/i.test(msg)){ try{ localStorage.removeItem('a13_voicerss_key'); }catch(_){} }
+      throw new Error(msg.slice(0, 120));
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = hFileName();
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    st.textContent = '已下載 ' + hFileName();
+  }catch(err){
+    st.style.color = '#c00'; st.textContent = 'MP3 產生失敗：' + (err.message || err) + '（可先用「發音」播放）';
+  }
+}
+(function(){ // 事件放在 document 上（按鈕是 buildStaticUI 之後才產生）
+  document.addEventListener('click', e=>{
+    const b = e.target.closest('#hLangBar button[data-lang]');
+    if(b){ hLang = b.dataset.lang; hRenderLang(); return; }
+    if(e.target.closest('#hSpeak')) hSpeak();
+    else if(e.target.closest('#hStop')) hStopSpeech();
+    else if(e.target.closest('#hMp3')) hDownloadMp3();
+  });
+})();
+
 
 buildStaticUI();
 
