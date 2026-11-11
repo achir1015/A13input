@@ -4,6 +4,10 @@
 
 與「線上月班表管理系統」同一套做法：
 
+
+https://github.com/user-attachments/assets/cad2a76a-7b66-4ac8-803a-d6367c34ce1f
+
+
 ```
 Firebase 帳號登入（程式內建，自動）
  └─ 公司（例：臺北市立聯合醫院忠孝院區）
