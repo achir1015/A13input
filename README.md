@@ -1,5 +1,9 @@
 # A13input  A13輸入資料 https://achir1015.github.io/A13input/
 
+
+https://github.com/user-attachments/assets/0bdc0225-ff4a-4cf5-bf33-12a131732047
+
+
 ## 公司／部門與管理者密碼
 
 與「線上月班表管理系統」同一套做法：
